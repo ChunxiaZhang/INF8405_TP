@@ -1,6 +1,7 @@
 package com.memorygame.example.zoe.tp1_memorygame;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.View;
@@ -45,7 +46,11 @@ public class UserSettingActivity extends ActionBarActivity {
                     }
                     else {
                         //Open GameView
-                        Toast.makeText(getApplicationContext(), "Start game!", Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(getApplicationContext(), "Start game!", Toast.LENGTH_SHORT).show();
+
+                        Intent i = new Intent(UserSettingActivity.this, GamePlaying.class);
+
+                        startActivity(i);
                     }
                 }
                 else
@@ -60,3 +65,4 @@ public class UserSettingActivity extends ActionBarActivity {
 
     }
 }
+

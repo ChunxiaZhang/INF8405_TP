@@ -13,5 +13,6 @@
     <string name="name_text">name</string>
     <string name="gameStart_text">Start</string>
     <string name="title_userSettingActivity">Players</string>
+    <string name="score_Text">Score:</string>
 
 </resources>
