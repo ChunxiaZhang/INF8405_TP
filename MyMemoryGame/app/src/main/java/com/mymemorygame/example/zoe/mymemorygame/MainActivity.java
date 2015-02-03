@@ -31,12 +31,14 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class MainActivity extends ActionBarActivity implements PlayerSettingDialogFragment.PlayerSettingListener,
-        OptionDialogFragment.SelectItemListener, GameFinishDialogFragment.SelectFinishItemListener {
+        OptionDialogFragment.SelectItemListener, GameFinishDialogFragment.SelectFinishItemListener, Observer {
 
     private TableLayout gameTable;
     private TextView playerScoreText1, playerScoreText2;
@@ -51,17 +53,15 @@ public class MainActivity extends ActionBarActivity implements PlayerSettingDial
     public List<Drawable> images;
     public Drawable backImage;
     public static Player playerOne, playerTwo;
+    private Player currentPlayer;
     private boolean isFirstPlayer;
-    private boolean isPlayWithRobot;
+    private boolean isRobotPlaying;
     private GameService gameService;
     private Handler handler = new Handler() {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case 0x1233:
                     checkPieces();
-                    //for(Piece piece: templePiecesList) {
-                       // piece.button.setEnabled(true);
-                    //}
                     break;
             }
         }
@@ -79,18 +79,20 @@ public class MainActivity extends ActionBarActivity implements PlayerSettingDial
 
     private void initialGameView() {
         gameTable = (TableLayout) findViewById(R.id.gameViewTable);
-        playerOne = new Player();
-        playerTwo = new Player("Robot");
-        isPlayWithRobot = true;
+        playerOne = new HumanPlayer();
+        playerTwo = new RobotPlayer();
+        currentPlayer = playerOne;
+        firstPiece = null;
+        secondPiece = null;
         piecesList = new ArrayList<>();
         templePiecesList = new ArrayList<>();
-        isPlayWithRobot = true;
+        isRobotPlaying = false;
         gameService = new GameService();
         loadImages();
         piecesIndex = gameService.getPiecesIndex(ROW_COUNT, COL_COUNT);
         backImage =  getResources().getDrawable(R.drawable.verso);
         showOptionDialog();
-        firstPiece = null;
+
         leftPieces = COL_COUNT*ROW_COUNT;
 
         for (int x = 0; x < ROW_COUNT; x++)
@@ -98,10 +100,14 @@ public class MainActivity extends ActionBarActivity implements PlayerSettingDial
             gameTable.addView(createRow(x));
         }
         templePiecesList.addAll(piecesList);
-        showScoresTexts();
+        updateScoresTexts();
     }
     private void startNewGame() {
         isFirstPlayer = true;
+        firstPiece = null;
+        secondPiece = null;
+        leftPieces = COL_COUNT*ROW_COUNT;
+        currentPlayer = playerOne;
         piecesIndex = gameService.getPiecesIndex(ROW_COUNT, COL_COUNT);
         templePiecesList.clear();
         templePiecesList.addAll(piecesList);
@@ -110,10 +116,8 @@ public class MainActivity extends ActionBarActivity implements PlayerSettingDial
             piece.button.setBackgroundDrawable(backImage);
         }
 
-        leftPieces = COL_COUNT*ROW_COUNT;
-        firstPiece = null;
-        Toast.makeText(this, playerOne.getName(), Toast.LENGTH_LONG).show();
-        showScoresTexts();
+        Toast.makeText(this, currentPlayer.getName(), Toast.LENGTH_LONG).show();
+        updateScoresTexts();
     }
 
     void showOptionDialog() {
@@ -130,11 +134,8 @@ public class MainActivity extends ActionBarActivity implements PlayerSettingDial
                 showPlayerSettingDialog();
                 break;
             case 1:
-                isPlayWithRobot = true;
-                playerOne.setName("You");
-                playerOne.setScore(0);
-                playerTwo.setName("Robot");
-                playerTwo.setScore(0);
+                playerOne = new HumanPlayer();
+                playerTwo = new RobotPlayer();
                 startNewGame();
                 break;
             case 2:
@@ -154,25 +155,19 @@ public class MainActivity extends ActionBarActivity implements PlayerSettingDial
     }
     @Override
     public void onPlayerSetting(String name1, String name2) {
-        playerOne.setName(name1);
-        playerOne.setScore(0);
-        playerTwo.setName(name2);
-        playerTwo.setScore(0);
-        isPlayWithRobot = false;
+        playerOne = new HumanPlayer(name1);
+        playerTwo = new HumanPlayer(name2);
         startNewGame();
     }
 
 
-    private void showScoresTexts() {
+    private void updateScoresTexts() {
         playerScoreText1 = (TextView) findViewById(R.id.scorePlayer1);
         playerScoreText2 = (TextView) findViewById(R.id.scorePlayer2);
 
         playerScoreText1.setText(this.playerOne.getName() + ": " + this.playerOne.getScore());
         playerScoreText2.setText(this.playerTwo.getName() + ": " + this.playerTwo.getScore());
     }
-
-
-
 
 
     private TableRow createRow(int x)
@@ -198,6 +193,12 @@ public class MainActivity extends ActionBarActivity implements PlayerSettingDial
         final Button button = new Button(this);
         button.setBackgroundDrawable(backImage);
         button.setId(100*x + y);
+        if(isRobotPlaying) {
+            button.setEnabled(false);
+        }
+        else {
+            button.setEnabled(true);
+        }
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -282,7 +283,7 @@ public class MainActivity extends ActionBarActivity implements PlayerSettingDial
             else {
                 playerTwo.increaseScore();
             }
-            showScoresTexts();
+            updateScoresTexts();
         }
         else {
             secondPiece.button.setBackgroundDrawable(backImage);
@@ -301,82 +302,22 @@ public class MainActivity extends ActionBarActivity implements PlayerSettingDial
 
     private void changePlayer() {
         isFirstPlayer = !isFirstPlayer;
-        String message;
-        if(isFirstPlayer) {
-            message = playerOne.getName();
+        if(currentPlayer == playerOne) {
+            currentPlayer = playerTwo;
         }
         else {
-            message = playerTwo.getName();
+            currentPlayer = playerOne;
         }
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        isRobotPlaying = currentPlayer instanceof RobotPlayer;
 
-        if(isPlayWithRobot && isFirstPlayer) {
-            //for(Piece piece: templePiecesList) {
-             //   piece.button.setEnabled(false);
-          //  }
-
-            robotPlay();
-
-           /* Log.i("changePlayer", "It's Robot's turn!");
-            handler.sendEmptyMessage(0x123);
-            Timer timer = new Timer(false);
-            timer.schedule(new TimerTask()
-            {
-                public void run()
-                {
-                    Log.i("changePlayer", "Timer schedule send message!");
-                    handler.sendEmptyMessage(0x123);
-                }
-            }, 2000);*/
-
-        }
-
+        Toast.makeText(this, currentPlayer.getName(), Toast.LENGTH_LONG).show();
+        currentPlayer.choosePiece();
     }
 
-    private Piece choosePieceRandom() {
-        Random rand = new Random();
-        int location;
-        do {
-            location = rand.nextInt(ROW_COUNT*COL_COUNT);
-        }while (templePiecesList.contains(piecesList.get(location)));
-        return piecesList.get(location);
+    @Override
+    public void update(Observable object, Object arg) {
+        Toast.makeText(this, "Robot chose", Toast.LENGTH_LONG).show();
     }
-    public void robotPlay() {
-        Log.i("robotPlay: ", "start choose the first piece");
-        firstPiece = choosePieceRandom();
-        Log.i("robotPlay: ", "start choose the second piece");
-        secondPiece = choosePieceRandom();
-        Timer timer = new Timer(false);
-        timer.schedule(new TimerTask()
-        {
-            public void run()
-            {
-                Log.i("Timer run to ", "checkPieces");
-                handler.sendEmptyMessage(0x1233);
-            }
-        }, 1000);
-
-       /* Log.i("handler", "Robot is playing!");
-
-        Log.i("robotPlay", "firstPiece is null");
-        firstPiece = choosePieceRandom();
-        Log.i("robotPlay", "choose the firstPiece: " + firstPiece.x + "  " + firstPiece.y);
-        firstPiece.button.setBackgroundDrawable(images.get(pieces[firstPiece.x][firstPiece.y]));
-
-        secondPiece = choosePieceRandom();
-        secondPiece.button.setBackgroundDrawable(images.get(pieces[secondPiece.x][secondPiece.y]));
-        Timer timer = new Timer(false);
-        timer.schedule(new TimerTask()
-        {
-            public void run()
-            {
-                 handler.sendEmptyMessage(0x1233);
-            }
-        }, 1000);*/
-
-
-    }
-
 
     public void gameFinished() {
         android.support.v4.app.FragmentTransaction ft = getSupportFragmentManager().beginTransaction();

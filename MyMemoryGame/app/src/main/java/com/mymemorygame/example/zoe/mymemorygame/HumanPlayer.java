@@ -1,29 +1,22 @@
 package com.mymemorygame.example.zoe.mymemorygame;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Observable;
 
 /**
- * Created by Zoe on 15-01-29.
+ * Created by Zoe on 15-02-03.
  */
-public class Player {
+public class HumanPlayer extends Observable implements Player{
     private String name;
-
     private int score;
-    private List<Integer> steps;
 
-    public Player(String name) {
+    public HumanPlayer(String name) {
         this.name = name;
         this.score = 0;
     }
 
-    public Player() {
+    public HumanPlayer() {
         this.name = "You";
         this.score = 0;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public void setScore(int score) {
@@ -41,4 +34,7 @@ public class Player {
     public void increaseScore() {
         this.score++;
     }
+
+    public void choosePiece() {}
+
 }
