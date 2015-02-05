@@ -1,5 +1,6 @@
 package com.mymemorygame.example.zoe.mymemorygame;
 
+import android.app.ActionBar;
 import android.content.res.Configuration;
 
 import android.graphics.drawable.Drawable;
@@ -10,12 +11,15 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 
 import android.util.Log;
+import android.util.Pair;
 import android.view.Gravity;
 
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.LayoutInflater;
+import android.view.View.OnClickListener;
 
 import android.widget.Button;
 
@@ -24,6 +28,8 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.PopupWindow;
+import android.widget.LinearLayout.LayoutParams;
 
 import java.util.ArrayList;
 
@@ -67,13 +73,29 @@ public class MainActivity extends ActionBarActivity implements PlayerSettingDial
         }
     };
 
+    private MemoryGameSQLiteOpenHelper dbHelper;
+    private PopupWindow scorePopupWindow;
+    private View popupLayout;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        LayoutInflater inflater = LayoutInflater.from(this);
+        popupLayout = inflater.inflate(R.layout.popup_bestscores, null);
+        scorePopupWindow = new PopupWindow(popupLayout,LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
+        Button btn_dismiss = (Button) popupLayout.findViewById(R.id.btn_dismiss);
+        btn_dismiss.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                scorePopupWindow.dismiss();
+                scorePopupWindow.setFocusable(false);
+                showOptionDialog();
+            }
+        });
         initialGameView();
+        dbHelper = new MemoryGameSQLiteOpenHelper(MainActivity.this);
         AgentApplication.getInstance().addActivity(this);
     }
 
@@ -139,6 +161,8 @@ public class MainActivity extends ActionBarActivity implements PlayerSettingDial
                 startNewGame();
                 break;
             case 2:
+                //afficher les scores
+                showBestScores();
                 break;
             case 3:
                 AgentApplication.getInstance().onTerminate();
@@ -160,6 +184,44 @@ public class MainActivity extends ActionBarActivity implements PlayerSettingDial
         startNewGame();
     }
 
+    public void showBestScores(){
+        scorePopupWindow.setAnimationStyle(R.style.PopupAnimation);
+        scorePopupWindow.showAtLocation(findViewById(R.id.overAllView), Gravity.NO_GRAVITY, 0, 0);
+        List<Pair<String,Integer>> bestScores = dbHelper.findBestScore();
+        if(bestScores.size()>0){
+            TextView playerName1 = (TextView)popupLayout.findViewById(R.id.playerName1);
+            playerName1.setText(bestScores.get(0).first);
+            TextView score1 = (TextView)popupLayout.findViewById(R.id.playerScore1);
+            score1.setText(bestScores.get(0).second.toString());
+        }
+        if(bestScores.size()>1){
+            TextView playerName2 = (TextView)popupLayout.findViewById(R.id.playerName2);
+            playerName2.setText(bestScores.get(1).first);
+            TextView score2 = (TextView)popupLayout.findViewById(R.id.playerScore2);
+            score2.setText(bestScores.get(1).second.toString());
+        }
+        if(bestScores.size()>2){
+            TextView playerName3 = (TextView)popupLayout.findViewById(R.id.playerName3);
+            playerName3.setText(bestScores.get(2).first);
+            TextView score3 = (TextView)popupLayout.findViewById(R.id.playerScore3);
+            score3.setText(bestScores.get(2).second.toString());
+        }
+        if(bestScores.size()>3) {
+            TextView playerName4 = (TextView) popupLayout.findViewById(R.id.playerName4);
+            playerName4.setText(bestScores.get(3).first);
+            TextView score4 = (TextView) popupLayout.findViewById(R.id.playerScore4);
+            score4.setText(bestScores.get(3).second.toString());
+        }
+        if(bestScores.size()>4) {
+            TextView playerName5 = (TextView) popupLayout.findViewById(R.id.playerName5);
+            playerName5.setText(bestScores.get(4).first);
+            TextView score5 = (TextView) popupLayout.findViewById(R.id.playerScore5);
+            score5.setText(bestScores.get(4).second.toString());
+        }
+        scorePopupWindow.setFocusable(true);
+        scorePopupWindow.update();
+
+    }
 
     private void updateScoresTexts() {
         playerScoreText1 = (TextView) findViewById(R.id.scorePlayer1);
@@ -288,14 +350,17 @@ public class MainActivity extends ActionBarActivity implements PlayerSettingDial
         else {
             secondPiece.button.setBackgroundDrawable(backImage);
             firstPiece.button.setBackgroundDrawable(backImage);
+            changePlayer();
         }
 
         firstPiece = null;
         secondPiece = null;
         Log.i("checkPieces","checkPieces");
-        changePlayer();
+
 
         if(leftPieces <= 0) {
+            //enregistrer le score du gagnant dans la base
+            saveScore();
             gameFinished();
         }
     }
@@ -317,6 +382,19 @@ public class MainActivity extends ActionBarActivity implements PlayerSettingDial
     @Override
     public void update(Observable object, Object arg) {
         Toast.makeText(this, "Robot chose", Toast.LENGTH_LONG).show();
+    }
+
+    private void saveScore() {
+        if(playerOne.getScore() > playerTwo.getScore()) {
+            dbHelper.insert(playerOne.getName(),playerOne.getScore());
+        }
+        else if(playerOne.getScore() < playerTwo.getScore()) {
+            dbHelper.insert(playerTwo.getName(),playerTwo.getScore());
+        }
+        else {
+            dbHelper.insert(playerOne.getName(),playerOne.getScore());
+            dbHelper.insert(playerTwo.getName(),playerTwo.getScore());
+        }
     }
 
     public void gameFinished() {

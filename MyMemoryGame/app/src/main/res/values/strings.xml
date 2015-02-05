@@ -13,6 +13,8 @@
     <string name="start_game">Start Game</string>
     <string name="cancel">Cancel</string>
     <string name="player_setting">Name setting</string>
+    <string name="score">score</string>
+    <string name="ok">OK</string>
 
     <string-array name="option_name">
         <item>Two players</item>
