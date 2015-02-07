@@ -8,6 +8,4 @@ public interface Player {
     String getName();
     int getScore();
     void increaseScore();
-    void choosePiece();
-
 }

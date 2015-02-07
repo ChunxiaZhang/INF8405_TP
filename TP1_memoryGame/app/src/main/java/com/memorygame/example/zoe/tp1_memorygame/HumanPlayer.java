@@ -14,11 +14,6 @@ public class HumanPlayer extends Observable implements Player{
         this.score = 0;
     }
 
-    public HumanPlayer() {
-        this.name = "You";
-        this.score = 0;
-    }
-
     public void setScore(int score) {
         this.score = score;
     }
@@ -34,7 +29,5 @@ public class HumanPlayer extends Observable implements Player{
     public void increaseScore() {
         this.score++;
     }
-
-    public void choosePiece() {}
 
 }

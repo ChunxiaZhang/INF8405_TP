@@ -13,8 +13,6 @@ import java.util.Random;
 public class RobotPlayer extends Observable implements Player{
     private String name;
     private int score;
-    private int selectPieceIndex;
-    private List<Integer> listIndex;
 
     public RobotPlayer() {
         this.name = "Robot";
@@ -37,26 +35,6 @@ public class RobotPlayer extends Observable implements Player{
 
     public void increaseScore() {
         this.score++;
-    }
-
-    public void setListIndex(ArrayList<Integer> listIndex) {
-        this.listIndex = listIndex;
-    }
-
-    public int getSelectPieceIndex() {
-        return this.selectPieceIndex;
-    }
-
-    public void choosePiece() {
-        /*Log.i("RobotPlayer: " , "start to choose piece");
-        Random rand = new Random();
-        int index;
-        do {
-            index = rand.nextInt(MainActivity.ROW_COUNT*MainActivity.COL_COUNT);
-        }while (this.listIndex.contains(index));
-        this.selectPieceIndex = index;
-        setChanged();
-        notifyObservers();*/
     }
 
 }

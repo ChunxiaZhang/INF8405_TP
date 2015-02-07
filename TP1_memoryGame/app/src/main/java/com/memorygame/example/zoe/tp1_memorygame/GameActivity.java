@@ -2,6 +2,7 @@ package com.memorygame.example.zoe.tp1_memorygame;
 
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -35,26 +36,51 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
     private Piece secondPiece;
     private List<Piece> piecesList;
     private List<Piece> leftPiecesList;
-    //private List<Integer> leftPiecesIndex;
     private List<Piece> piecesRobotTurned;
 
     public int [][] piecesIndex = new int [MainActivity.COL_COUNT] [MainActivity.ROW_COUNT];
     public List<Drawable> images;
     public Drawable backImage;
-    private Player currentPlayer;
+   // private Player currentPlayer;
     private boolean isFirstPlayer;
     //private boolean isRobotPlaying;
 
-
+    private Thread thread;
     private Handler handler = new Handler() {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case 0x1233:
                     if(checkPieces()) {
-                        Log.i("handler: ", "need to changer player");
-                        changePlayer();
+                        if(changePlayer()) {
+                            Log.i("handler:", "robotChoosePiece for the first time");
+                            robotChoosePiece();
+                        }
                     }
                     break;
+                case 0x123:
+                    if(firstPiece == null) {
+                        firstPiece = piecesList.get(msg.arg2+msg.arg1*MainActivity.COL_COUNT);
+                        firstPiece.button.setBackgroundDrawable(images.get(piecesIndex[msg.arg1][msg.arg2]));
+                        Log.i("handler:", "robotChoosePiece for the second time");
+                        robotChoosePiece();
+                    }
+                    else {
+                        Log.i("handler", "turn the secondPiece");
+                        secondPiece = piecesList.get(msg.arg2+msg.arg1*MainActivity.COL_COUNT);
+                        secondPiece.button.setBackgroundDrawable(images.get(piecesIndex[msg.arg1][msg.arg2]));
+                        try {
+                            Log.i("handler:", "sleep(500)");
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        if(checkPieces()) {
+                            Log.i("handler: ", "need to changer player");
+                            changePlayer();
+                        }
+                    }
+                    break;
+
             }
         }
     };
@@ -94,7 +120,7 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
         piecesIndex = getPiecesIndex(MainActivity.ROW_COUNT, MainActivity.COL_COUNT);
         leftPiecesList.addAll(piecesList);
 
-        currentPlayer = MainActivity.playerOne;
+        //currentPlayer = MainActivity.playerOne;
 
         for(Piece piece : piecesList) {
             piece.button.setVisibility(View.VISIBLE);
@@ -260,28 +286,49 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
         return isNeedChangerPlayer;
     }
 
-    private void changePlayer() {
+    private boolean changePlayer() {
 
         //if(currentPlayer == MainActivity.playerOne) {
         if(isFirstPlayer) {
-            currentPlayer = MainActivity.playerTwo;
-
+            //currentPlayer = MainActivity.playerTwo;
+            Log.i("changePlayer: ", "to secondPlayer");
             playerScoreText2.setTextColor(Color.RED);
             playerScoreText1.setTextColor(Color.BLACK);
         }
         else {
-            currentPlayer = MainActivity.playerOne;
+            //currentPlayer = MainActivity.playerOne;
+            Log.i("changePlayer: ", "to firstPlayer");
             playerScoreText1.setTextColor(Color.RED);
             playerScoreText2.setTextColor(Color.BLACK);
         }
         isFirstPlayer = !isFirstPlayer;
-        //isRobotPlaying = currentPlayer instanceof RobotPlayer;
-        if(MainActivity.isRobotPlaying && !isFirstPlayer) {
-            Log.i("changePlayer", "Robot");
-            robotPlaying();
-        }
 
-        //currentPlayer.choosePiece();
+        return (MainActivity.isRobotPlaying && !isFirstPlayer);
+    }
+
+    public void robotChoosePiece() {
+            Timer timer = new Timer(false);
+            timer.schedule(new TimerTask()
+            {
+                public void run()
+                {
+
+                    int x, y;
+                    Piece piece;
+                    Random rand = new Random();
+                    //do{
+                    x = rand.nextInt(MainActivity.ROW_COUNT);
+                    y = rand.nextInt(MainActivity.COL_COUNT);
+                    piece = piecesList.get(y+x*MainActivity.COL_COUNT);
+                    //}while(leftPiecesList.contains(piece));
+
+                    Message msg = new Message();
+                    msg.what = 0x123;
+                    msg.arg1 = x;
+                    msg.arg2 = y;
+                    handler.sendMessage(msg);
+                }
+            }, 500);
     }
 
     public void robotPlaying() {
@@ -298,11 +345,11 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
         Log.i("robotPlaying:" , "choose the first piece" + x + y);
         firstPiece = piecesList.get(y+x*MainActivity.COL_COUNT);
         firstPiece.button.setBackgroundDrawable(images.get(piecesIndex[x][y]));
-        try {
-                Thread.sleep(1000);
+        /*try {
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 return;
-            }
+            }*/
 
         //do{
             x = rand.nextInt(MainActivity.ROW_COUNT);
@@ -313,11 +360,12 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
         Log.i("robotPlaying:" , "choose the second piece" + x + y);
         secondPiece = piecesList.get(y + x * MainActivity.COL_COUNT);
         secondPiece.button.setBackgroundDrawable(images.get(piecesIndex[x][y]));
-        try {
+        /*try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 return;
-            }
+            }*/
+        checkPieces();
         //if(checkPieces()) {
             //changePlayer();
        // }
@@ -368,5 +416,6 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
                 break;
         }
     }
+
 
 }
