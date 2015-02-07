@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -54,9 +56,22 @@ public class OptionDialogFragment extends DialogFragment {
             }
         });
 
+        builder.setOnKeyListener(new DialogInterface.OnKeyListener() {
+            @Override
+            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+                if(keyCode == KeyEvent.KEYCODE_BACK){
+                    Log.i("exit","exit game");
+                    AgentApplication.getInstance().onTerminate();
+
+                }
+                return false;
+            }
+        });
+
 
         // Create the AlertDialog object and return it
         return builder.create();
     }
+
 
 }

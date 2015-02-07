@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical"
+
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+
+        android:layout_centerHorizontal="true"
+        android:gravity="center_horizontal"
+        android:id="@+id/gameBtnLinearLayout">
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:id="@+id/btnTwoPlayers"
+        android:text="@string/btnTwoPlayers_text"
+        android:layout_margin="40dp"
+        android:layout_weight="2"
+        />
+    <Button
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/btnWithTablet"
+        android:layout_margin="40dp"
+        android:text="@string/btnWithRobot_text"/>
+    <Button
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/btnScores"
+        android:layout_margin="40dp"
+        android:text="@string/btnScores_text"/>
+    <Button
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/btnExit"
+        android:layout_margin="40dp"
+        android:text="@string/btnExit_text"/>
+
+</LinearLayout>

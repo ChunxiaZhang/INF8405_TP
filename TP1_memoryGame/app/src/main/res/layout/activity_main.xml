@@ -30,9 +30,9 @@
         <Button
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/btnWithTablet"
+            android:id="@+id/btnWithRobot"
             android:layout_margin="40dp"
-            android:text="@string/btnWithTablet_text"/>
+            android:text="@string/btnWithRobot_text"/>
         <Button
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"

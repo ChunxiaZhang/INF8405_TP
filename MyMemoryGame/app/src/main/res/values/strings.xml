@@ -16,6 +16,11 @@
     <string name="score">score</string>
     <string name="ok">OK</string>
 
+    <string name="btnTwoPlayers_text">Two Players</string>
+    <string name="btnWithRobot_text">Play with Robot</string>
+    <string name="btnScores_text">The best scores</string>
+    <string name="btnExit_text">Exit</string>
+
     <string-array name="option_name">
         <item>Two players</item>
         <item>Play with Robot</item>

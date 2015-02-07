@@ -3,6 +3,7 @@ package com.mymemorygame.example.zoe.mymemorygame;
 import android.app.ActionBar;
 import android.content.res.Configuration;
 
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
@@ -14,6 +15,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.Gravity;
 
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -80,7 +82,12 @@ public class MainActivity extends ActionBarActivity implements PlayerSettingDial
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
+        playerScoreText1 = (TextView) findViewById(R.id.scorePlayer1);
+        playerScoreText1.setBackgroundResource(R.drawable.textviewborder);
+        playerScoreText2 = (TextView) findViewById(R.id.scorePlayer2);
+        playerScoreText2.setBackgroundResource(R.drawable.textviewborder);
 
         LayoutInflater inflater = LayoutInflater.from(this);
         popupLayout = inflater.inflate(R.layout.popup_bestscores, null);
@@ -137,12 +144,11 @@ public class MainActivity extends ActionBarActivity implements PlayerSettingDial
             piece.button.setVisibility(View.VISIBLE);
             piece.button.setBackgroundDrawable(backImage);
         }
-
-        Toast.makeText(this, currentPlayer.getName(), Toast.LENGTH_LONG).show();
+        playerScoreText1.setTextColor(Color.RED);
         updateScoresTexts();
     }
 
-    void showOptionDialog() {
+    public void showOptionDialog() {
         android.support.v4.app.FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         DialogFragment newFragment = new OptionDialogFragment();
         newFragment.show(ft, "dialog");
@@ -224,8 +230,6 @@ public class MainActivity extends ActionBarActivity implements PlayerSettingDial
     }
 
     private void updateScoresTexts() {
-        playerScoreText1 = (TextView) findViewById(R.id.scorePlayer1);
-        playerScoreText2 = (TextView) findViewById(R.id.scorePlayer2);
 
         playerScoreText1.setText(this.playerOne.getName() + ": " + this.playerOne.getScore());
         playerScoreText2.setText(this.playerTwo.getName() + ": " + this.playerTwo.getScore());
@@ -369,13 +373,18 @@ public class MainActivity extends ActionBarActivity implements PlayerSettingDial
         isFirstPlayer = !isFirstPlayer;
         if(currentPlayer == playerOne) {
             currentPlayer = playerTwo;
+
+            playerScoreText2.setTextColor(Color.RED);
+            playerScoreText1.setTextColor(Color.BLACK);
         }
         else {
             currentPlayer = playerOne;
+            playerScoreText1.setTextColor(Color.RED);
+            playerScoreText2.setTextColor(Color.BLACK);
         }
         isRobotPlaying = currentPlayer instanceof RobotPlayer;
 
-        Toast.makeText(this, currentPlayer.getName(), Toast.LENGTH_LONG).show();
+       // Toast.makeText(this, currentPlayer.getName(), Toast.LENGTH_LONG).show();
         currentPlayer.choosePiece();
     }
 
@@ -439,6 +448,25 @@ public class MainActivity extends ActionBarActivity implements PlayerSettingDial
         images.add(getResources().getDrawable(R.drawable.g_rabbit));
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+
+        if(keyCode == KeyEvent.KEYCODE_BACK) {
+            Log.i("Back:" ,"backKey pressed");
+           AgentApplication.getInstance().onTerminate();
+            return true;
+        }
+        //return super.onKeyDown(keyCode,event);
+        return false;
+    }
+   /* @Override
+    public void onBackPressed() {
+        // TODO Auto-generated method stub
+        Log.i("Back","backKey pressed");
+        super.onBackPressed();
+        AgentApplication.getInstance().onTerminate();
+
+    }*/
 
     //It doesn't work
     @Override
