@@ -31,7 +31,7 @@ public class Piece {
     }
 
     public static int getLocation(int x, int y) {
-        return x + y * MainActivity.COL_COUNT;
+        return y+x*MainActivity.COL_COUNT;
     }
 
 }

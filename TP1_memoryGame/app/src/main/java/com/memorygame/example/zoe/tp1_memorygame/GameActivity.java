@@ -218,13 +218,13 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
         //button.setBackgroundDrawable(images.get(location));
         button.setBackgroundDrawable(images.get(piecesIndex[x][y]));
         if(firstPiece == null){
-            firstPiece = piecesList.get(y+x*MainActivity.COL_COUNT);
+            firstPiece = piecesList.get(location);
         }
         else{
             if(firstPiece.x == x && firstPiece.y == y){
                 return; //the user pressed the same piece
             }
-            secondPiece = piecesList.get(y+x*MainActivity.COL_COUNT);
+            secondPiece = piecesList.get(location);
 
             Timer timer = new Timer(false);
             timer.schedule(new TimerTask()
