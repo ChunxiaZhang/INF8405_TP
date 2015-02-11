@@ -20,18 +20,20 @@ public class GameFinishDialogFragment extends DialogFragment {
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
+        GameActivity gameActivity = (GameActivity)getActivity();
+
         String title, message;
-        if(MainActivity.playerOne.getScore() > MainActivity.playerTwo.getScore()) {
-            title = MainActivity.playerOne.getName() + " win! Congratulations!\n" + MainActivity.playerOne.getName() + " : " + MainActivity.playerOne.getScore() +
-            "     " + MainActivity.playerTwo.getName() + " : " + MainActivity.playerTwo.getScore();
+        if(gameActivity.getPlayerOne().getScore() > gameActivity.getPlayerTwo().getScore()) {
+            title = gameActivity.getPlayerOne().getName() + " win! Congratulations!\n" + gameActivity.getPlayerOne().getName() + " : " + gameActivity.getPlayerOne().getScore() +
+            "     " + gameActivity.getPlayerTwo().getName() + " : " + gameActivity.getPlayerTwo().getScore();
         }
-        else if(MainActivity.playerOne.getScore() < MainActivity.playerTwo.getScore()) {
-            title = MainActivity.playerTwo.getName() + " win! Congratulations!\n" + MainActivity.playerTwo.getName() + " : " + MainActivity.playerTwo.getScore() +
-                    "    " + MainActivity.playerOne.getName() + " : " + MainActivity.playerOne.getScore();
+        else if(gameActivity.getPlayerOne().getScore() < gameActivity.getPlayerTwo().getScore()) {
+            title = gameActivity.getPlayerTwo().getName() + " win! Congratulations!\n" + gameActivity.getPlayerTwo().getName() + " : " + gameActivity.getPlayerTwo().getScore() +
+                    "    " + gameActivity.getPlayerOne().getName() + " : " + gameActivity.getPlayerOne().getScore();
         }
         else {
-            title = "Draw!\n" + MainActivity.playerOne.getName() + " : " + MainActivity.playerOne.getScore() +
-                    "    " + MainActivity.playerTwo.getName() + " : " + MainActivity.playerTwo.getScore();
+            title = "Draw!\n" + gameActivity.getPlayerOne().getName() + " : " + gameActivity.getPlayerOne().getScore() +
+                    "    " + gameActivity.getPlayerTwo().getName() + " : " + gameActivity.getPlayerTwo().getScore();
         }
 
 

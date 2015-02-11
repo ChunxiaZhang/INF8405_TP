@@ -37,4 +37,8 @@ public class RobotPlayer extends Observable implements Player{
         this.score++;
     }
 
+    public List choosePiece(){
+
+    }
+
 }

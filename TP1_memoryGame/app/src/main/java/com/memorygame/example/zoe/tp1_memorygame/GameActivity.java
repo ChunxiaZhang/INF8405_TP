@@ -1,5 +1,8 @@
 package com.memorygame.example.zoe.tp1_memorygame;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -11,6 +14,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Gravity;
 
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 
@@ -43,7 +47,8 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
     public Drawable backImage;
    // private Player currentPlayer;
     private boolean isFirstPlayer;
-    //private boolean isRobotPlaying;
+    private boolean isRobotPlaying;
+    private Player playerOne, playerTwo;
 
     private Thread thread;
     private Handler handler = new Handler() {
@@ -51,10 +56,14 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
             switch (msg.what) {
                 case 0x1233:
                     if(checkPieces()) {
-                        if(changePlayer()) {
-                            Log.i("handler:", "robotChoosePiece for the first time");
+                        changePlayer();
+                        if(!isFirstPlayer&&isRobotPlaying){
                             robotChoosePiece();
                         }
+//                        if(changePlayer()) {
+//                            Log.i("handler:", "robotChoosePiece for the first time");
+//                            robotChoosePiece();
+//                        }
                     }
                     break;
                 case 0x123:
@@ -92,6 +101,16 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
 
+        String name1 = getIntent().getStringExtra("playerOneName");
+        playerOne = new HumanPlayer(name1);
+        isRobotPlaying = getIntent().getBooleanExtra("robotPlayMode",false);
+        if(isRobotPlaying){
+            playerTwo = new RobotPlayer();
+        }else{
+            String name2 = getIntent().getStringExtra("playerTwoName");
+            playerTwo = new HumanPlayer(name2);
+        }
+
         playerScoreText1 = (TextView) findViewById(R.id.scorePlayer1);
         playerScoreText1.setBackgroundResource(R.drawable.textviewborder);
         playerScoreText2 = (TextView) findViewById(R.id.scorePlayer2);
@@ -99,6 +118,11 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
 
         gameTable = (TableLayout) findViewById(R.id.gameViewTable);
 
+
+        initialGame();
+    }
+
+    private void initialGame() {
         isFirstPlayer = true;
         piecesList = new ArrayList<>();
         leftPiecesList = new ArrayList<>();
@@ -106,21 +130,18 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
         loadImages();
         backImage =  getResources().getDrawable(R.drawable.verso);
         piecesIndex = getPiecesIndex(MainActivity.ROW_COUNT, MainActivity.COL_COUNT);
+        if(gameTable.getChildCount()!=0){
+            gameTable.removeAllViewsInLayout();
+        }
         for (int x = 0; x < MainActivity.ROW_COUNT; x++)
         {
             gameTable.addView(createRow(x));
         }
-        initialGameView();
-    }
 
-    private void initialGameView() {
-        isFirstPlayer = true;
         firstPiece = null;
         secondPiece = null;
         piecesIndex = getPiecesIndex(MainActivity.ROW_COUNT, MainActivity.COL_COUNT);
         leftPiecesList.addAll(piecesList);
-
-        //currentPlayer = MainActivity.playerOne;
 
         for(Piece piece : piecesList) {
             piece.button.setVisibility(View.VISIBLE);
@@ -188,7 +209,7 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
         final Button button = new Button(this);
         button.setBackgroundDrawable(backImage);
         button.setId(100*x + y);
-        if(MainActivity.isRobotPlaying && !isFirstPlayer) {
+        if(isRobotPlaying && !isFirstPlayer) {
             Log.i("createImageButton: ", "robot is playing");
             button.setEnabled(false);
         }
@@ -221,6 +242,7 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
             firstPiece = piecesList.get(location);
         }
         else{
+
             if(firstPiece.x == x && firstPiece.y == y){
                 return; //the user pressed the same piece
             }
@@ -249,10 +271,10 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
             leftPiecesList.remove(secondPiece);
 
             if(isFirstPlayer) {
-                MainActivity.playerOne.increaseScore();
+                playerOne.increaseScore();
             }
             else {
-                MainActivity.playerTwo.increaseScore();
+                playerTwo.increaseScore();
             }
             updateScoresTexts();
             isNeedChangerPlayer = false;
@@ -260,7 +282,7 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
         }
         else {
             Log.i("checkPiece: ", "two pieces are different");
-            if(MainActivity.isRobotPlaying && !isFirstPlayer) {
+            if(isRobotPlaying && !isFirstPlayer) {
                 Log.i("checkPiece: ", "add pieces to the pieces turned by robot");
                 piecesRobotTurned.add(firstPiece);
                 piecesRobotTurned.add(secondPiece);
@@ -286,24 +308,20 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
         return isNeedChangerPlayer;
     }
 
-    private boolean changePlayer() {
-
-        //if(currentPlayer == MainActivity.playerOne) {
+    private void changePlayer() {
         if(isFirstPlayer) {
-            //currentPlayer = MainActivity.playerTwo;
             Log.i("changePlayer: ", "to secondPlayer");
             playerScoreText2.setTextColor(Color.RED);
             playerScoreText1.setTextColor(Color.BLACK);
         }
         else {
-            //currentPlayer = MainActivity.playerOne;
             Log.i("changePlayer: ", "to firstPlayer");
             playerScoreText1.setTextColor(Color.RED);
             playerScoreText2.setTextColor(Color.BLACK);
         }
         isFirstPlayer = !isFirstPlayer;
 
-        return (MainActivity.isRobotPlaying && !isFirstPlayer);
+        //return (MainActivity.isRobotPlaying && !isFirstPlayer);
     }
 
     public void robotChoosePiece() {
@@ -374,20 +392,20 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
 
     private void updateScoresTexts() {
 
-        playerScoreText1.setText(MainActivity.playerOne.getName() + ": " + MainActivity.playerOne.getScore());
-        playerScoreText2.setText(MainActivity.playerTwo.getName() + ": " + MainActivity.playerTwo.getScore());
+        playerScoreText1.setText(playerOne.getName() + ": " + playerOne.getScore());
+        playerScoreText2.setText(playerTwo.getName() + ": " + playerTwo.getScore());
     }
 
     private void saveScore() {
-        if(MainActivity.playerOne.getScore() > MainActivity.playerTwo.getScore()) {
-            MainActivity.dbHelper.insert(MainActivity.playerOne.getName(),MainActivity.playerOne.getScore());
+        if(playerOne.getScore() > playerTwo.getScore()) {
+            MainActivity.dbHelper.insert(playerOne.getName(),playerOne.getScore());
         }
-        else if(MainActivity.playerOne.getScore() < MainActivity.playerTwo.getScore()) {
-            MainActivity.dbHelper.insert(MainActivity.playerTwo.getName(), MainActivity.playerTwo.getScore());
+        else if(playerOne.getScore() < playerTwo.getScore()) {
+            MainActivity.dbHelper.insert(playerTwo.getName(), playerTwo.getScore());
         }
         else {
-            MainActivity.dbHelper.insert(MainActivity.playerOne.getName(), MainActivity.playerOne.getScore());
-            MainActivity.dbHelper.insert(MainActivity.playerTwo.getName(), MainActivity.playerTwo.getScore());
+            MainActivity.dbHelper.insert(playerOne.getName(), playerOne.getScore());
+            MainActivity.dbHelper.insert(playerTwo.getName(), playerTwo.getScore());
         }
     }
 
@@ -402,9 +420,9 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
     public void onSelectFinishItem(int item) {
         switch (item) {
             case 0:
-                MainActivity.playerOne.setScore(0);
-                MainActivity.playerTwo.setScore(0);
-                initialGameView();
+                playerOne.setScore(0);
+                playerTwo.setScore(0);
+                initialGame();
                 break;
             case 1:
                 this.finish();
@@ -418,4 +436,23 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
     }
 
 
+    public Player getPlayerOne(){return playerOne;}
+    public Player getPlayerTwo(){return playerTwo;}
+
+//    @Override
+//    public boolean onKeyDown(int keyCode, KeyEvent event) {
+//        if (keyCode == KeyEvent.KEYCODE_BACK) {
+//            new AlertDialog.Builder(this).setMessage("Do you want to abandon the current game?")
+//                    .setIcon(android.R.drawable.ic_dialog_alert)
+//                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+//                        @Override
+//                        public void onClick(DialogInterface dialog, int which) {
+//                            Intent i = new Intent(GameActivity.this, MainActivity.class);
+//                            startActivity(i);
+//                        }
+//                    }).setNegativeButton(android.R.string.no,null).show();
+//            return true;
+//        }
+//        return super.onKeyDown(keyCode, event);
+//    }
 }

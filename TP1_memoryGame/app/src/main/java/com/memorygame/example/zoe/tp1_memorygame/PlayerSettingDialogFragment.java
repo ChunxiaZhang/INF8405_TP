@@ -10,6 +10,9 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
+
+import android.widget.Button;
 
 /**
  * Created by Zoe on 15-02-06.
@@ -19,7 +22,7 @@ public class PlayerSettingDialogFragment extends DialogFragment {
     private EditText playerName2;
 
     public interface PlayerSettingListener {
-        void onPlayerSetting(String name1, String name2, boolean isRobotPlaying);
+        void startNewGame(String name1, String name2, boolean isRobotPlaying);
     }
 
     @Override
@@ -37,17 +40,40 @@ public class PlayerSettingDialogFragment extends DialogFragment {
             playerName2.setEnabled(false);
         }
 
-        builder.setView(view)
-                .setPositiveButton("Start Game",
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Log.i("PlayerSettingDialogFragment:", "Start Game");
-                                PlayerSettingListener listener = (PlayerSettingListener) getActivity();
-                                listener.onPlayerSetting(playerName1.getText().toString(),
-                                        playerName2.getText().toString(), isRobotPlaying);
-                            }
-                        });
+//        builder.setView(view)
+//                .setPositiveButton("Start Game",
+//                        new DialogInterface.OnClickListener() {
+//                            @Override
+//                            public void onClick(DialogInterface dialog, int which) {
+//                                Log.i("PlayerSettingDialogFragment:", "Start Game");
+//                                PlayerSettingListener listener = (PlayerSettingListener) getActivity();
+//                                if(playerName1.getText().length() == 0 || playerName2.getText().length() == 0){
+//                                    Toast.makeText(getActivity().getApplicationContext(),"player's names are imcomplete!",Toast.LENGTH_LONG).show();
+//                                }else{
+//                                    listener.startNewGame(playerName1.getText().toString(),
+//                                            playerName2.getText().toString(), isRobotPlaying);
+//                                }
+//                            }
+//                        });
+        Button btnPositive = (Button)view.findViewById(R.id.btnGameStart);
+        btnPositive.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(playerName1.getText().length() == 0 || playerName2.getText().length() == 0){
+                    Toast.makeText(getActivity().getApplicationContext(),"player's names are imcomplete!",Toast.LENGTH_LONG).show();
+                }else{
+                    if(playerName1.getText().toString().equals(playerName2.getText().toString())){
+                        Toast.makeText(getActivity().getApplicationContext(),"player's name can't be identical",Toast.LENGTH_LONG).show();
+                    }else{
+                        PlayerSettingListener listener = (PlayerSettingListener) getActivity();
+                        listener.startNewGame(playerName1.getText().toString(),playerName2.getText().toString(), isRobotPlaying);
+                        dismiss();
+                    }
+                }
+            }
+        });
+
+        builder.setView(view);
         return builder.create();
     }
 }
