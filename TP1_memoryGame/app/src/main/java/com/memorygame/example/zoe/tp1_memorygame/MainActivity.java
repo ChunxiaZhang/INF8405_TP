@@ -22,8 +22,7 @@ import java.util.List;
 
 public class MainActivity extends ActionBarActivity
         implements PlayerSettingDialogFragment.PlayerSettingListener{
-    public static final int ROW_COUNT = 6;
-    public static final int COL_COUNT = 4;
+
     Button btnTwoPlayersModel;
     Button btnPlayWithRobot;
     Button btnBestScores;
