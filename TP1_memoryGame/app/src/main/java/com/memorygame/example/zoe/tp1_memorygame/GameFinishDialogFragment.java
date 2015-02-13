@@ -30,11 +30,11 @@ public class GameFinishDialogFragment extends DialogFragment {
 
         String title;
         if(gameActivity.getPlayerOne().getScore() > gameActivity.getPlayerTwo().getScore()) {
-            title = gameActivity.getPlayerOne().getPlayerName() + " win! Congratulations!\n" + gameActivity.getPlayerOne().getPlayerName() + " : " + gameActivity.getPlayerOne().getScore() +
+            title = gameActivity.getPlayerOne().getPlayerName() + " win!\n" + gameActivity.getPlayerOne().getPlayerName() + " : " + gameActivity.getPlayerOne().getScore() +
             "     " + gameActivity.getPlayerTwo().getPlayerName() + " : " + gameActivity.getPlayerTwo().getScore();
         }
         else if(gameActivity.getPlayerOne().getScore() < gameActivity.getPlayerTwo().getScore()) {
-            title = gameActivity.getPlayerTwo().getPlayerName() + " win! Congratulations!\n" + gameActivity.getPlayerTwo().getPlayerName() + " : " + gameActivity.getPlayerTwo().getScore() +
+            title = gameActivity.getPlayerTwo().getPlayerName() + " win!\n" + gameActivity.getPlayerTwo().getPlayerName() + " : " + gameActivity.getPlayerTwo().getScore() +
                     "    " + gameActivity.getPlayerOne().getPlayerName() + " : " + gameActivity.getPlayerOne().getScore();
         }
         else {
@@ -64,7 +64,11 @@ public class GameFinishDialogFragment extends DialogFragment {
                 return false;
             }
         });
+
+        AlertDialog alertDialog = builder.create();
+        alertDialog.setCanceledOnTouchOutside(false);
+
         // Create the AlertDialog object and return it
-        return builder.create();
+        return alertDialog;
     }
 }

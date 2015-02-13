@@ -16,12 +16,13 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="Small Text"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Medium Text"
             android:id="@+id/scorePlayer1"
             android:background="@drawable/textviewborder"
             android:padding="8dp"
-            android:layout_gravity="center_horizontal" />
+            android:layout_marginLeft="15dp"
+            android:layout_gravity="left" />
 
         <TableLayout
             android:layout_width="match_parent"
@@ -33,12 +34,13 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="Small Text"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Medium Text"
             android:id="@+id/scorePlayer2"
             android:background="@drawable/textviewborder"
             android:padding="8dp"
-            android:layout_gravity="center_horizontal" />
+            android:layout_marginRight="15dp"
+            android:layout_gravity="right" />
 
     </LinearLayout>
 </RelativeLayout>
