@@ -40,21 +40,6 @@ public class PlayerSettingDialogFragment extends DialogFragment {
             playerName2.setEnabled(false);
         }
 
-//        builder.setView(view)
-//                .setPositiveButton("Start Game",
-//                        new DialogInterface.OnClickListener() {
-//                            @Override
-//                            public void onClick(DialogInterface dialog, int which) {
-//                                Log.i("PlayerSettingDialogFragment:", "Start Game");
-//                                PlayerSettingListener listener = (PlayerSettingListener) getActivity();
-//                                if(playerName1.getText().length() == 0 || playerName2.getText().length() == 0){
-//                                    Toast.makeText(getActivity().getApplicationContext(),"player's names are imcomplete!",Toast.LENGTH_LONG).show();
-//                                }else{
-//                                    listener.startNewGame(playerName1.getText().toString(),
-//                                            playerName2.getText().toString(), isRobotPlaying);
-//                                }
-//                            }
-//                        });
         Button btnPositive = (Button)view.findViewById(R.id.btnGameStart);
         btnPositive.setOnClickListener(new View.OnClickListener() {
             @Override

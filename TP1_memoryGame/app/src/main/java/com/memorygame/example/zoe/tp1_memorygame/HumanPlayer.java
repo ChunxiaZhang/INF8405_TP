@@ -40,7 +40,7 @@ public class HumanPlayer extends Player{
                     matchMsg.arg2 = secondPiece.getIdx();
                     firstPiece = null;
                     secondPiece = null;
-                    gameActivity.mainHandler.sendMessageDelayed(matchMsg,1500);
+                    gameActivity.mainHandler.sendMessageDelayed(matchMsg,1000);
                 }
             }
         };

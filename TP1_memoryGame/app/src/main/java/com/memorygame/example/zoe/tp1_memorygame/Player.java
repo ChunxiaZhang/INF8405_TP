@@ -38,7 +38,4 @@ public class Player extends Thread{
         }
         return isMatch;
     }
-
-
-    public List<Piece> choosePiece(List<Piece> piecesLeft,List<Piece> piecesTurned){return null;}
 }

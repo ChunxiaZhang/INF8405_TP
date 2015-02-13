@@ -1,5 +1,7 @@
 package com.memorygame.example.zoe.tp1_memorygame;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -9,6 +11,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBarActivity;
 
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.View;
 
 import android.widget.Button;
@@ -20,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by Zoe on 15-02-06.
@@ -37,7 +42,7 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
     private List<Drawable> images;
     private Drawable backImage;
     private boolean isFirstPlayer;
-    private boolean isRobotPlaying;
+    private boolean isRobotPlaying; // boolean for robot mode
     private int nbImgTurned;
 
     private Player playerOne, playerTwo;
@@ -48,8 +53,36 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
             boolean isMatch = (boolean)msg.obj;
             int idx1 = msg.arg1;
             int idx2 = msg.arg2;
+            if(!isRobotPlaying){
+                updateInterface(isMatch, idx1, idx2);
+                nbImgTurned = 0;
+            }else{
+                if(isFirstPlayer){
+                    updateInterface(isMatch, idx1, idx2);
+                    //is the robot's to play
+                    if(!isFirstPlayer && !piecesLeft.isEmpty()){
+                        playerTwo.playerHandler.sendEmptyMessage(0);
+                    }
+                    if(isFirstPlayer) nbImgTurned = 0;
+                }else{
+                    turnPieceForRobot(isMatch,idx1,idx2);
+                }
+            }
+        }
+    };
+
+    private Handler delayDisplayHandler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            boolean isMatch = (boolean)msg.obj;
+            int idx1 = msg.arg1;
+            int idx2 = msg.arg2;
             updateInterface(isMatch, idx1, idx2);
-            nbImgTurned = 0;
+            //is the robot's to play
+            if(!isFirstPlayer && !piecesLeft.isEmpty()){
+                playerTwo.playerHandler.sendEmptyMessage(0);
+            }
+            if(isFirstPlayer) nbImgTurned = 0;
         }
     };
 
@@ -63,7 +96,7 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
         playerOne = new HumanPlayer(name1,this);
         isRobotPlaying = getIntent().getBooleanExtra("robotPlayMode",false);
         if(isRobotPlaying){
-            playerTwo = new RobotPlayer();
+            playerTwo = new RobotPlayer(this);
         }else{
             String name2 = getIntent().getStringExtra("playerTwoName");
             playerTwo = new HumanPlayer(name2,this);
@@ -104,6 +137,7 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
             //piece.button.setBackgroundDrawable(backImage);
         }
         playerScoreText1.setTextColor(Color.RED);
+        playerScoreText2.setTextColor(Color.BLACK);
         updateScoresTexts();
     }
 
@@ -167,12 +201,6 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
         final Button button = new Button(this);
         button.setBackgroundDrawable(backImage);
         button.setId(COL_COUNT*numRow + numCol);
-//        if(isRobotPlaying && !isFirstPlayer) {
-//            button.setEnabled(false);
-//        }
-//        else {
-//            button.setEnabled(true);
-//        }
         button.setEnabled(true);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -185,12 +213,16 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
                     button.setBackgroundDrawable(images.get(piecesImgClasses.get(numRow).get(numCol)));
                     nbImgTurned++;
 
-                    Message playerMsg = new Message();
-                    playerMsg.obj = piecesList.get(btnId);
+                    Message humanPlayerMsg = new Message();
+                    humanPlayerMsg.obj = piecesList.get(btnId);
                     if(isFirstPlayer){
-                        playerOne.playerHandler.sendMessage(playerMsg);
+                        playerOne.playerHandler.sendMessage(humanPlayerMsg);
                     }else{
-                        playerTwo.playerHandler.sendMessage(playerMsg);
+                        //if the second player is not the robot(which is also a human player)
+                        //we can send message for match checking process
+                        if(!isRobotPlaying){
+                            playerTwo.playerHandler.sendMessage(humanPlayerMsg);
+                        }
                     }
                 }
             }
@@ -198,29 +230,21 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
         return button;
     }
 
-//    private void robotTurnPiece(List<Piece> piecesChosen){
-//        firstPiece = piecesChosen.get(0);
-//        firstPiece.showFrontImage();
-//        secondPiece = piecesChosen.get(1);
-//        secondPiece.showFrontImage();
-//        Timer timer = new Timer(false);
-//        timer.schedule(new TimerTask()
-//        {
-//            public void run()
-//            {
-//                handler.sendEmptyMessage(0x001);
-//            }
-//        }, 1000);
-//    }
-
     public void updateInterface(boolean isMatch, int idx1, int idx2){
         Piece piece1 = piecesList.get(idx1);
         Piece piece2 = piecesList.get(idx2);
+
         if(isMatch){
             piece1.enableButton(false);
             piece2.enableButton(false);
             piecesLeft.remove(piece1);
             piecesLeft.remove(piece2);
+            if(piecesTurned.contains(piece1)){
+                piecesTurned.remove(piece1);
+            }
+            if(piecesTurned.contains(piece2)){
+                piecesTurned.remove(piece2);
+            }
             updateScoresTexts();
             if(piecesLeft.size() <= 0) {
                 gameFinished();
@@ -236,8 +260,30 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
                 playerScoreText1.setTextColor(Color.RED);
                 playerScoreText2.setTextColor(Color.BLACK);
             }
+            if(!piecesTurned.contains(piece1)){
+                piecesTurned.add(piece1);
+            }
+            if(!piecesTurned.contains(piece2)){
+                piecesTurned.add(piece2);
+            }
             isFirstPlayer = !isFirstPlayer;
         }
+    }
+
+    public void turnPieceForRobot(final boolean isMatch, final int idx1, final int idx2){
+        piecesList.get(idx1).showFrontImage();
+        piecesList.get(idx2).showFrontImage();
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Message msg = new Message();
+                msg.obj = isMatch;
+                msg.arg1 = idx1;
+                msg.arg2 = idx2;
+                delayDisplayHandler.sendMessage(msg);
+            }
+        }, 1000);
     }
 
     public void updateScoresTexts() {
@@ -285,21 +331,23 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
 
     public Player getPlayerOne(){return playerOne;}
     public Player getPlayerTwo(){return playerTwo;}
+    public List<Piece> getPiecesLeft(){return piecesLeft;}
+    public List<Piece> getPiecesTurned(){return piecesTurned;}
 
-//    @Override
-//    public boolean onKeyDown(int keyCode, KeyEvent event) {
-//        if (keyCode == KeyEvent.KEYCODE_BACK) {
-//            new AlertDialog.Builder(this).setMessage("Do you want to abandon the current game?")
-//                    .setIcon(android.R.drawable.ic_dialog_alert)
-//                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-//                        @Override
-//                        public void onClick(DialogInterface dialog, int which) {
-//                            Intent i = new Intent(GameActivity.this, MainActivity.class);
-//                            startActivity(i);
-//                        }
-//                    }).setNegativeButton(android.R.string.no,null).show();
-//            return true;
-//        }
-//        return super.onKeyDown(keyCode, event);
-//    }
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            new AlertDialog.Builder(this).setMessage("Do you want to abandon the current game?")
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setTitle("Exit Confirm")
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            GameActivity.this.finish();
+                        }
+                    }).setNegativeButton(android.R.string.no, null).show();
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
 }

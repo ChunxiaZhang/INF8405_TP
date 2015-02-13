@@ -1,5 +1,9 @@
 package com.memorygame.example.zoe.tp1_memorygame;
 
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -9,12 +13,34 @@ import java.util.Random;
  */
 public class RobotPlayer extends Player{
 
-    public RobotPlayer() {
+    public RobotPlayer(GameActivity gameActivity) {
         this.playerName = "Robot";
         this.score = 0;
+        this.gameActivity = gameActivity;
     }
 
-    @Override
+    public void run(){
+        this.setName("RobotPlayer_Thread");
+        Looper.prepare();
+        this.playerHandler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                List<Piece> piecesLeft = gameActivity.getPiecesLeft();
+                List<Piece> piecesTurned = gameActivity.getPiecesTurned();
+                List<Piece> piecesChosen = choosePiece(piecesLeft,piecesTurned);
+                firstPiece = piecesChosen.get(0);
+                secondPiece = piecesChosen.get(1);
+                boolean isMatch = checkPieces();
+                Message matchMsg = new Message();
+                matchMsg.obj = isMatch;
+                matchMsg.arg1 = piecesChosen.get(0).getIdx();
+                matchMsg.arg2 = piecesChosen.get(1).getIdx();
+                gameActivity.mainHandler.sendMessageDelayed(matchMsg,1000);
+            }
+        };
+        Looper.loop();
+    }
+
     public List<Piece> choosePiece(List<Piece> piecesLeft,List<Piece> piecesTurned){
         List<Integer> listClasses = new ArrayList<>();
         for(int i = 0;i<piecesTurned.size();i++){
