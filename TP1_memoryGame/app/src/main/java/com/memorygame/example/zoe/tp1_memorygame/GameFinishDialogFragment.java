@@ -24,16 +24,16 @@ public class GameFinishDialogFragment extends DialogFragment {
 
         String title, message;
         if(gameActivity.getPlayerOne().getScore() > gameActivity.getPlayerTwo().getScore()) {
-            title = gameActivity.getPlayerOne().getName() + " win! Congratulations!\n" + gameActivity.getPlayerOne().getName() + " : " + gameActivity.getPlayerOne().getScore() +
-            "     " + gameActivity.getPlayerTwo().getName() + " : " + gameActivity.getPlayerTwo().getScore();
+            title = gameActivity.getPlayerOne().getPlayerName() + " win! Congratulations!\n" + gameActivity.getPlayerOne().getPlayerName() + " : " + gameActivity.getPlayerOne().getScore() +
+            "     " + gameActivity.getPlayerTwo().getPlayerName() + " : " + gameActivity.getPlayerTwo().getScore();
         }
         else if(gameActivity.getPlayerOne().getScore() < gameActivity.getPlayerTwo().getScore()) {
-            title = gameActivity.getPlayerTwo().getName() + " win! Congratulations!\n" + gameActivity.getPlayerTwo().getName() + " : " + gameActivity.getPlayerTwo().getScore() +
-                    "    " + gameActivity.getPlayerOne().getName() + " : " + gameActivity.getPlayerOne().getScore();
+            title = gameActivity.getPlayerTwo().getPlayerName() + " win! Congratulations!\n" + gameActivity.getPlayerTwo().getPlayerName() + " : " + gameActivity.getPlayerTwo().getScore() +
+                    "    " + gameActivity.getPlayerOne().getPlayerName() + " : " + gameActivity.getPlayerOne().getScore();
         }
         else {
-            title = "Draw!\n" + gameActivity.getPlayerOne().getName() + " : " + gameActivity.getPlayerOne().getScore() +
-                    "    " + gameActivity.getPlayerTwo().getName() + " : " + gameActivity.getPlayerTwo().getScore();
+            title = "Draw!\n" + gameActivity.getPlayerOne().getPlayerName() + " : " + gameActivity.getPlayerOne().getScore() +
+                    "    " + gameActivity.getPlayerTwo().getPlayerName() + " : " + gameActivity.getPlayerTwo().getScore();
         }
 
 

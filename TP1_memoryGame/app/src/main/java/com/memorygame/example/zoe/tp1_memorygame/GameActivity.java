@@ -1,23 +1,17 @@
 package com.memorygame.example.zoe.tp1_memorygame;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
+
 import android.view.Gravity;
-
-import android.view.KeyEvent;
 import android.view.View;
-import android.widget.Button;
 
+import android.widget.Button;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -26,9 +20,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * Created by Zoe on 15-02-06.
@@ -38,37 +29,29 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
     private static final int COL_COUNT = 4;
     private TextView playerScoreText1, playerScoreText2;
     private TableLayout gameTable;
-    private Piece firstPiece;
-    private Piece secondPiece;
     private List<Piece> piecesList;
     private List<Piece> piecesLeft;
     private List<Piece> piecesTurned;
 
     private List<List<Integer>> piecesImgClasses;
-    public List<Drawable> images;
-    public Drawable backImage;
+    private List<Drawable> images;
+    private Drawable backImage;
     private boolean isFirstPlayer;
     private boolean isRobotPlaying;
+    private int nbImgTurned;
+
     private Player playerOne, playerTwo;
 
-    private Handler handler = new Handler() {
+    public Handler mainHandler = new Handler() {
+        @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case 0x001:
-                    if(!checkPieces()) {
-                        changePlayer();
-                    }
-                    if(!isFirstPlayer&&isRobotPlaying){
-                        List<Piece> piecesChosen = playerTwo.choosePiece(piecesLeft,piecesTurned);
-                        robotTurnPiece(piecesChosen);
-                    }
-                    break;
-
-            }
+            boolean isMatch = (boolean)msg.obj;
+            int idx1 = msg.arg1;
+            int idx2 = msg.arg2;
+            updateInterface(isMatch, idx1, idx2);
+            nbImgTurned = 0;
         }
     };
-
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -77,13 +60,13 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
 
         //create two players
         String name1 = getIntent().getStringExtra("playerOneName");
-        playerOne = new HumanPlayer(name1);
+        playerOne = new HumanPlayer(name1,this);
         isRobotPlaying = getIntent().getBooleanExtra("robotPlayMode",false);
         if(isRobotPlaying){
             playerTwo = new RobotPlayer();
         }else{
             String name2 = getIntent().getStringExtra("playerTwoName");
-            playerTwo = new HumanPlayer(name2);
+            playerTwo = new HumanPlayer(name2,this);
         }
 
         //initialize the scores textviews and their border
@@ -93,10 +76,13 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
         playerScoreText2.setBackgroundResource(R.drawable.textviewborder);
         gameTable = (TableLayout) findViewById(R.id.gameViewTable);
         initialGame();
+        playerOne.start();
+        playerTwo.start();
     }
 
     private void initialGame() {
         isFirstPlayer = true;
+        nbImgTurned = 0;
         piecesList = new ArrayList<>();
         piecesLeft = new ArrayList<>();
         piecesTurned = new ArrayList<>();
@@ -111,8 +97,6 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
             gameTable.addView(createRow(x));
         }
 
-        firstPiece = null;
-        secondPiece = null;
         piecesLeft.addAll(piecesList);
 
         for(Piece piece : piecesList) {
@@ -173,7 +157,7 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
         for(int y = 0; y < COL_COUNT; y++) {
             Button button = createImageButton(x, y);
             row.addView(button);
-            Piece piece = new Piece(x, y, piecesImgClasses.get(x).get(y), images.get(piecesImgClasses.get(x).get(y)), button);
+            Piece piece = new Piece(x, y,x*COL_COUNT+y, piecesImgClasses.get(x).get(y), images.get(piecesImgClasses.get(x).get(y)), backImage, button);
             piecesList.add(piece);
         }
         return row;
@@ -193,129 +177,86 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(firstPiece!=null && secondPiece != null){
-                    return;
-                }
-                int id = v.getId();
-                int numRow = id/COL_COUNT;
-                int numCol = id%COL_COUNT;
+                if(nbImgTurned<2){
+                    int btnId = v.getId();
+                    int numRow = btnId/COL_COUNT;
+                    int numCol = btnId%COL_COUNT;
+                    //Turn image
+                    button.setBackgroundDrawable(images.get(piecesImgClasses.get(numRow).get(numCol)));
+                    nbImgTurned++;
 
-                humanTurnPiece((Button) v, numRow, numCol);
+                    Message playerMsg = new Message();
+                    playerMsg.obj = piecesList.get(btnId);
+                    if(isFirstPlayer){
+                        playerOne.playerHandler.sendMessage(playerMsg);
+                    }else{
+                        playerTwo.playerHandler.sendMessage(playerMsg);
+                    }
+                }
             }
         });
         return button;
     }
 
-    private void humanTurnPiece(Button button, int numRow, int numCol) {
-        int numPiece = COL_COUNT*numRow+numCol;
-        button.setBackgroundDrawable(images.get(piecesImgClasses.get(numRow).get(numCol)));
-        if(firstPiece == null){
-            firstPiece = piecesList.get(numPiece);
-        }
-        else{
-            if(firstPiece.getNumRow() == numRow && firstPiece.getNumCol() == numCol){
-                return; //the user pressed the same piece
+//    private void robotTurnPiece(List<Piece> piecesChosen){
+//        firstPiece = piecesChosen.get(0);
+//        firstPiece.showFrontImage();
+//        secondPiece = piecesChosen.get(1);
+//        secondPiece.showFrontImage();
+//        Timer timer = new Timer(false);
+//        timer.schedule(new TimerTask()
+//        {
+//            public void run()
+//            {
+//                handler.sendEmptyMessage(0x001);
+//            }
+//        }, 1000);
+//    }
+
+    public void updateInterface(boolean isMatch, int idx1, int idx2){
+        Piece piece1 = piecesList.get(idx1);
+        Piece piece2 = piecesList.get(idx2);
+        if(isMatch){
+            piece1.enableButton(false);
+            piece2.enableButton(false);
+            piecesLeft.remove(piece1);
+            piecesLeft.remove(piece2);
+            updateScoresTexts();
+            if(piecesLeft.size() <= 0) {
+                gameFinished();
             }
-            secondPiece = piecesList.get(numPiece);
-
-            Timer timer = new Timer(false);
-            timer.schedule(new TimerTask()
-            {
-                public void run()
-                {
-                    handler.sendEmptyMessage(0x001);
-                }
-            }, 2000);
-        }
-    }
-
-    private void robotTurnPiece(List<Piece> piecesChosen){
-        firstPiece = piecesChosen.get(0);
-        firstPiece.showFrontImage();
-        secondPiece = piecesChosen.get(1);
-        secondPiece.showFrontImage();
-        Timer timer = new Timer(false);
-        timer.schedule(new TimerTask()
-        {
-            public void run()
-            {
-                handler.sendEmptyMessage(0x001);
-            }
-        }, 1000);
-    }
-
-    public boolean checkPieces(){
-        boolean isMatch;
-        if(firstPiece.getImgClass() == secondPiece.getImgClass()){
-            firstPiece.enableButton(false);
-            secondPiece.enableButton(false);
-            piecesLeft.remove(firstPiece);
-            piecesLeft.remove(secondPiece);
-
+        }else{
+            piece1.showBackImage();
+            piece2.showBackImage();
             if(isFirstPlayer) {
-                playerOne.increaseScore();
+                playerScoreText2.setTextColor(Color.RED);
+                playerScoreText1.setTextColor(Color.BLACK);
             }
             else {
-                playerTwo.increaseScore();
+                playerScoreText1.setTextColor(Color.RED);
+                playerScoreText2.setTextColor(Color.BLACK);
             }
-            updateScoresTexts();
-            isMatch = true;
+            isFirstPlayer = !isFirstPlayer;
         }
-        else {
-            if(isRobotPlaying) {
-                if(!piecesTurned.contains(firstPiece)){
-                    piecesTurned.add(firstPiece);
-                }
-                if(!piecesTurned.contains(secondPiece)){
-                    piecesTurned.add(secondPiece);
-                }
-            }
-            firstPiece.showBackImage(backImage);
-            secondPiece.showBackImage(backImage);
-            isMatch = false;
-        }
-
-        firstPiece = null;
-        secondPiece = null;
-        if(piecesLeft.size() <= 0) {
-            //enregistrer le score du gagnant dans la base
-            saveScore();
-            gameFinished();
-        }
-        return isMatch;
     }
 
-    private void changePlayer() {
-        if(isFirstPlayer) {
-            playerScoreText2.setTextColor(Color.RED);
-            playerScoreText1.setTextColor(Color.BLACK);
-        }
-        else {
-            playerScoreText1.setTextColor(Color.RED);
-            playerScoreText2.setTextColor(Color.BLACK);
-        }
-        isFirstPlayer = !isFirstPlayer;
-    }
-
-    private void updateScoresTexts() {
-        playerScoreText1.setText(playerOne.getName() + ": " + playerOne.getScore());
-        playerScoreText2.setText(playerTwo.getName() + ": " + playerTwo.getScore());
-    }
-
-    private void saveScore() {
-        if(playerOne.getScore() > playerTwo.getScore()) {
-            MainActivity.dbHelper.insert(playerOne.getName(),playerOne.getScore());
-        }
-        else if(playerOne.getScore() < playerTwo.getScore()) {
-            MainActivity.dbHelper.insert(playerTwo.getName(), playerTwo.getScore());
-        }
-        else {
-            MainActivity.dbHelper.insert(playerOne.getName(), playerOne.getScore());
-            MainActivity.dbHelper.insert(playerTwo.getName(), playerTwo.getScore());
-        }
+    public void updateScoresTexts() {
+        playerScoreText1.setText(playerOne.getPlayerName() + ": " + playerOne.getScore());
+        playerScoreText2.setText(playerTwo.getPlayerName() + ": " + playerTwo.getScore());
     }
 
     public void gameFinished() {
+        //enregistrer le score du gagnant dans la base
+        if(playerOne.getScore() > playerTwo.getScore()) {
+            MainActivity.dbHelper.insert(playerOne.getPlayerName(),playerOne.getScore());
+        }
+        else if(playerOne.getScore() < playerTwo.getScore()) {
+            MainActivity.dbHelper.insert(playerTwo.getPlayerName(), playerTwo.getScore());
+        }
+        else {
+            MainActivity.dbHelper.insert(playerOne.getPlayerName(), playerOne.getScore());
+            MainActivity.dbHelper.insert(playerTwo.getPlayerName(), playerTwo.getScore());
+        }
         android.support.v4.app.FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
 
         DialogFragment newFragment = new GameFinishDialogFragment();
