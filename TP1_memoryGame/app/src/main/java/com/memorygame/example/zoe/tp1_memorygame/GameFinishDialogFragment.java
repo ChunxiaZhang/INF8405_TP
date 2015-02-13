@@ -5,6 +5,12 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import java.util.zip.Inflater;
 
 /**
  * Created by Zoe on 15-02-02.
@@ -22,7 +28,7 @@ public class GameFinishDialogFragment extends DialogFragment {
 
         GameActivity gameActivity = (GameActivity)getActivity();
 
-        String title, message;
+        String title;
         if(gameActivity.getPlayerOne().getScore() > gameActivity.getPlayerTwo().getScore()) {
             title = gameActivity.getPlayerOne().getPlayerName() + " win! Congratulations!\n" + gameActivity.getPlayerOne().getPlayerName() + " : " + gameActivity.getPlayerOne().getScore() +
             "     " + gameActivity.getPlayerTwo().getPlayerName() + " : " + gameActivity.getPlayerTwo().getScore();
@@ -48,8 +54,16 @@ public class GameFinishDialogFragment extends DialogFragment {
 
             }
         });
-
-
+        builder.setOnKeyListener(new DialogInterface.OnKeyListener(){
+            @Override
+            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_BACK) {
+                    GameFinishDialogFragment.this.getActivity().finish();
+                    return true;
+                }
+                return false;
+            }
+        });
         // Create the AlertDialog object and return it
         return builder.create();
     }
