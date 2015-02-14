@@ -19,6 +19,9 @@ import android.widget.TextView;
 
 import java.util.List;
 
+/**
+ * The MainActivity class implements an activity that displays game model choose view
+ */
 
 public class MainActivity extends ActionBarActivity
         implements PlayerSettingDialogFragment.PlayerSettingListener{
@@ -40,13 +43,17 @@ public class MainActivity extends ActionBarActivity
         dbHelper = new MemoryGameSQLiteOpenHelper(MainActivity.this);
         btnTwoPlayersModel = (Button) findViewById(R.id.btnTwoPlayers);
 
+        /**
+         *  Two human players model button listener
+         *  To open player name setting dialog
+         */
         btnTwoPlayersModel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 android.support.v4.app.FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
                 DialogFragment newFragment = new PlayerSettingDialogFragment();
                 Bundle args = new Bundle();
-                args.putBoolean("RobotPlaying", false);
+                args.putBoolean("RobotPlaying", false); // Set play model is not playing with robot
                 newFragment.setArguments(args);
                 newFragment.show(ft, "dialog");
 
@@ -55,19 +62,27 @@ public class MainActivity extends ActionBarActivity
 
         btnPlayWithRobot = (Button) findViewById(R.id.btnWithRobot);
 
+        /**
+         *  Play with robot model button listener
+         *  To open player name setting dialog
+         */
         btnPlayWithRobot.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 android.support.v4.app.FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
                 DialogFragment newFragment = new PlayerSettingDialogFragment();
                 Bundle args = new Bundle();
-                args.putBoolean("RobotPlaying", true);
+                args.putBoolean("RobotPlaying", true); //Set play model is playing with robot
                 newFragment.setArguments(args);
                 newFragment.show(ft, "dialog");
             }
         });
 
         btnBestScores = (Button) findViewById(R.id.btnScores);
+        /**
+         * Best scores button listener
+         * To open scores dialog
+         */
         btnBestScores.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -77,6 +92,10 @@ public class MainActivity extends ActionBarActivity
         });
 
         btnExit = (Button) findViewById(R.id.btnExit);
+        /**
+         * Exit button listener
+         * To quit perfectly the application by using AgentApplication class via onTerminate() closing all activities
+         */
         btnExit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -113,7 +132,7 @@ public class MainActivity extends ActionBarActivity
         i.putExtra("playerOneName",name1);
         i.putExtra("playerTwoName",name2);
         i.putExtra("robotPlayMode",isRobotPlaying);
-        startActivity(i);
+        startActivity(i); //Send two players' name to GameActivity
 
     }
 
@@ -139,6 +158,9 @@ public class MainActivity extends ActionBarActivity
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Get data from MemoryGameSQLiteOpenHelper and show them
+     */
     public void showBestScores(){
         scorePopupWindow.setAnimationStyle(R.style.PopupAnimation);
         Log.i("showBestScores:", "set animation");

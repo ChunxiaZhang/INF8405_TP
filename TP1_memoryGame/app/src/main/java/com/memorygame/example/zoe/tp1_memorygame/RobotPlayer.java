@@ -35,6 +35,11 @@ public class RobotPlayer extends Player{
                 matchMsg.obj = isMatch;
                 matchMsg.arg1 = piecesChosen.get(0).getIdx();
                 matchMsg.arg2 = piecesChosen.get(1).getIdx();
+
+                /**
+                 * After choose the second piece send message to mainHandler
+                 * and let delay 1 second before update interface?????????
+                 */
                 gameActivity.mainHandler.sendMessageDelayed(matchMsg,1000);
             }
         };

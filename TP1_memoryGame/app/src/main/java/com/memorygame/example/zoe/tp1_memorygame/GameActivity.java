@@ -28,49 +28,62 @@ import java.util.TimerTask;
 
 /**
  * Created by Zoe on 15-02-06.
+ * GameActivity class implements an activity that displays game view,
+ * including a TableLayout and two TextView for display scores of the two players.
+ * Realize game logic
  */
 public class GameActivity extends ActionBarActivity implements GameFinishDialogFragment.SelectFinishItemListener{
-    private static final int ROW_COUNT = 6;
-    private static final int COL_COUNT = 4;
+    private static final int ROW_COUNT = 6; //Row count of table
+    private static final int COL_COUNT = 4; //Column count of table
     private TextView playerScoreText1, playerScoreText2;
     private TableLayout gameTable;
-    private List<Piece> piecesList;
-    private List<Piece> piecesLeft;
-    private List<Piece> piecesTurned;
+    private List<Piece> piecesList; //All pieces of the table
+    private List<Piece> piecesLeft; //All not matched pieces
+    private List<Piece> piecesTurned; //All matched pieces
 
-    private List<List<Integer>> piecesImgClasses;
-    private List<Drawable> images;
+    private List<List<Integer>> piecesImgClasses; // To indicate every element of table has with index of image
+    private List<Drawable> images; // Images which will be mapping in the table random
     private Drawable backImage;
     private boolean isFirstPlayer;
     private boolean isRobotPlaying; // boolean for robot mode
-    private int nbImgTurned;
+    private int nbImgTurned; // The number of pieces turned one round, it's always less than 2
 
     private Player playerOne, playerTwo;
 
+    /**
+     * This Handler used to handle players thread message
+     */
     public Handler mainHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             boolean isMatch = (boolean)msg.obj;
             int idx1 = msg.arg1;
             int idx2 = msg.arg2;
-            if(!isRobotPlaying){
+            if(!isRobotPlaying){ //if two human player model just update interface
                 updateInterface(isMatch, idx1, idx2);
                 nbImgTurned = 0;
             }else{
                 if(isFirstPlayer){
                     updateInterface(isMatch, idx1, idx2);
-                    //is the robot's to play
+                    //is the turn of robot's to play
                     if(!isFirstPlayer && !piecesLeft.isEmpty()){
+                        /**
+                         * Send message to robot play thread, let robot choose pieces
+                         */
                         playerTwo.playerHandler.sendEmptyMessage(0);
                     }
                     if(isFirstPlayer) nbImgTurned = 0;
                 }else{
+                    //If robot chose two pieces than turn the two pieces, after 1 second GameActivity update
                     turnPieceForRobot(isMatch,idx1,idx2);
                 }
             }
         }
     };
 
+    /**
+     * To handle delay update GameActivity message
+     */
     private Handler delayDisplayHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
@@ -80,6 +93,7 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
             updateInterface(isMatch, idx1, idx2);
             //is the robot's to play
             if(!isFirstPlayer && !piecesLeft.isEmpty()){
+                //Send message to robot play thread let robot choose pieces
                 playerTwo.playerHandler.sendEmptyMessage(0);
             }
             if(isFirstPlayer) nbImgTurned = 0;
@@ -109,8 +123,8 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
         playerScoreText2.setBackgroundResource(R.drawable.textviewborder);
         gameTable = (TableLayout) findViewById(R.id.gameViewTable);
         initialGame();
-        playerOne.start();
-        playerTwo.start();
+        playerOne.start(); // Starts the new Thread of execution.
+        playerTwo.start(); // Starts the new Thread of execution.
     }
 
     private void initialGame() {
@@ -160,6 +174,7 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
 
     public List<List<Integer>> getPiecesClasses(int row, int col) {
         List<List<Integer>> imgClasses = new ArrayList<>();
+        //Initial all list as -1
         for(int x = 0; x < row; x++){
             imgClasses.add(new ArrayList<Integer>());
             for(int y = 0; y < col; y++){
@@ -171,10 +186,11 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
         for(int i = 0; i < row*col/2; i++) {
             list.add(new Integer(i));
         }
-        list.addAll(list);
+        list.addAll(list); // pair the numbers between 0 and 11
 
-        Collections.shuffle(list);
+        Collections.shuffle(list); // Get a list pair random numbers between 0 and 11
 
+        //Give pair numbers between 0 and 11 to imgClasses
         Iterator<Integer> iterator = list.iterator();
         for(int x = 0; x < row; x++){
             for(int y = 0; y < col; y++){
@@ -230,6 +246,11 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
         return button;
     }
 
+    /**
+     * When players chose two pieces turn pieces back if not matched,
+     * or update scores TextView if matched and check if game finished
+     */
+
     public void updateInterface(boolean isMatch, int idx1, int idx2){
         Piece piece1 = piecesList.get(idx1);
         Piece piece2 = piecesList.get(idx2);
@@ -271,8 +292,8 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
     }
 
     public void turnPieceForRobot(final boolean isMatch, final int idx1, final int idx2){
-        piecesList.get(idx1).showFrontImage();
-        piecesList.get(idx2).showFrontImage();
+        piecesList.get(idx1).showFrontImage(); // Turn on the first piece
+        piecesList.get(idx2).showFrontImage(); // Turn on the second piece
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
@@ -281,7 +302,7 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
                 msg.obj = isMatch;
                 msg.arg1 = idx1;
                 msg.arg2 = idx2;
-                delayDisplayHandler.sendMessage(msg);
+                delayDisplayHandler.sendMessage(msg); // Let delay 1 second before update interface
             }
         }, 1000);
     }
@@ -309,6 +330,13 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
         newFragment.show(ft, "dialog");
     }
 
+    /**
+     * GameFinishDialogFragment listener, react according player choice
+     * @param item
+     * If item is 0 : try again game with the same players
+     *            1 : close this activity, return to MainActivity to choose play model
+     *            2 : exit the application
+     */
     @Override
     public void onSelectFinishItem(int item) {
         switch (item) {

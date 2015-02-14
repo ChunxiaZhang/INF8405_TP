@@ -13,6 +13,7 @@ public class AgentApplication extends Application {
     private List<Activity> activityList = new ArrayList<>();
     private static AgentApplication instance;
 
+    //Make sure there is only on instance of this class
     public static AgentApplication getInstance() {
         if(instance == null) {
             instance = new AgentApplication();
@@ -27,6 +28,7 @@ public class AgentApplication extends Application {
     @Override
     public void onTerminate() {
         super.onTerminate();
+        //Turn all the activities let exit application perfectly
         for(Activity activity : activityList) {
             activity.finish();
         }

@@ -1,6 +1,6 @@
 package com.memorygame.example.zoe.tp1_memorygame;
 
-import java.util.List;
+
 import android.os.Handler;
 
 /**

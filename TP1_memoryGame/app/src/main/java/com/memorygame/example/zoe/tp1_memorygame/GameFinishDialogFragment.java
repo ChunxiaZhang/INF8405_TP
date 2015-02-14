@@ -6,11 +6,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
-import java.util.zip.Inflater;
 
 /**
  * Created by Zoe on 15-02-02.

@@ -19,6 +19,9 @@ public class HumanPlayer extends Player{
         this.setName("HumanPlayer_Thread");
         Looper.prepare();
 
+        /**
+         * This Handler used to handle human player choose piece message
+         */
         this.playerHandler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
@@ -40,6 +43,11 @@ public class HumanPlayer extends Player{
                     matchMsg.arg2 = secondPiece.getIdx();
                     firstPiece = null;
                     secondPiece = null;
+
+                    /**
+                     * After second piece chose send message to mainHandler
+                     * Let GameActivity delay 1 second before update interface?????????
+                     */
                     gameActivity.mainHandler.sendMessageDelayed(matchMsg,1000);
                 }
             }

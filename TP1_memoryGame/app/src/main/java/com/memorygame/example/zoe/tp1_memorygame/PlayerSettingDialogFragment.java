@@ -45,7 +45,7 @@ public class PlayerSettingDialogFragment extends DialogFragment {
             @Override
             public void onClick(View v) {
                 if(playerName1.getText().length() == 0 || playerName2.getText().length() == 0){
-                    Toast.makeText(getActivity().getApplicationContext(),"player's names are imcomplete!",Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity().getApplicationContext(),"player's names are not complete!",Toast.LENGTH_LONG).show();
                 }else{
                     if(playerName1.getText().toString().equals(playerName2.getText().toString())){
                         Toast.makeText(getActivity().getApplicationContext(),"player's name can't be identical",Toast.LENGTH_LONG).show();
