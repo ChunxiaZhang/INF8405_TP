@@ -282,9 +282,15 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
                 playerScoreText2.setTextColor(Color.BLACK);
             }
             if(!piecesTurned.contains(piece1)){
+                if(piecesTurned.size()>=4){
+                    piecesTurned.remove(0);
+                }
                 piecesTurned.add(piece1);
             }
             if(!piecesTurned.contains(piece2)){
+                if(piecesTurned.size()>=4){
+                    piecesTurned.remove(0);
+                }
                 piecesTurned.add(piece2);
             }
             isFirstPlayer = !isFirstPlayer;
