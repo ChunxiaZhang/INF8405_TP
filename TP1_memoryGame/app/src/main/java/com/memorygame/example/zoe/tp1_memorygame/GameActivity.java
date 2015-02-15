@@ -14,7 +14,7 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -104,7 +104,7 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
-
+        AgentApplication.getInstance().addActivity(this);
         //create two players
         String name1 = getIntent().getStringExtra("playerOneName");
         playerOne = new HumanPlayer(name1,this);
@@ -205,7 +205,7 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
         TableRow row = new TableRow(gameTable.getContext());
         row.setHorizontalGravity(Gravity.CENTER);
         for(int y = 0; y < COL_COUNT; y++) {
-            Button button = createImageButton(x, y);
+            ImageButton button = createImageButton(x, y);
             row.addView(button);
             Piece piece = new Piece(x, y,x*COL_COUNT+y, piecesImgClasses.get(x).get(y), images.get(piecesImgClasses.get(x).get(y)), backImage, button);
             piecesList.add(piece);
@@ -213,8 +213,8 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
         return row;
     }
 
-    private Button createImageButton(int numRow, int numCol) {
-        final Button button = new Button(this);
+    private ImageButton createImageButton(int numRow, int numCol) {
+        final ImageButton button = new ImageButton(this);
         button.setBackgroundDrawable(backImage);
         button.setId(COL_COUNT*numRow + numCol);
         button.setEnabled(true);
