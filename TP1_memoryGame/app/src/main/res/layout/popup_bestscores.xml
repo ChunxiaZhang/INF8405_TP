@@ -3,7 +3,7 @@
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="#ffffff"
+    android:background="@drawable/room"
     android:id="@+id/layout_score"
     android:focusable="true"
     android:focusableInTouchMode="true"
@@ -11,9 +11,10 @@
     <Button
         android:id="@+id/btn_dismiss"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         android:padding="10dp"
         android:layout_marginTop="25dp"
+        android:background="@drawable/button_img"
         android:text="@string/ok"/>
     <TableLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -28,11 +29,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="10dp"
+                android:textSize="25sp"
                 android:text="@string/player_name"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="10dp"
+                android:textSize="25sp"
                 android:text="@string/score"/>
         </TableRow>
         <TableRow
@@ -41,12 +44,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="10dp"
+                android:textSize="20sp"
                 android:id="@+id/playerName1"
                 android:text=""/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="10dp"
+                android:textSize="20sp"
                 android:id="@+id/playerScore1"
                 android:text=""/>
         </TableRow>
@@ -56,12 +61,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="10dp"
+                android:textSize="20sp"
                 android:id="@+id/playerName2"
                 android:text=""/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="10dp"
+                android:textSize="20sp"
                 android:id="@+id/playerScore2"
                 android:text=""/>
         </TableRow>
@@ -71,12 +78,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="10dp"
+                android:textSize="20sp"
                 android:id="@+id/playerName3"
                 android:text=""/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="10dp"
+                android:textSize="20sp"
                 android:id="@+id/playerScore3"
                 android:text=""/>
         </TableRow>
@@ -86,12 +95,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="10dp"
+                android:textSize="20sp"
                 android:id="@+id/playerName4"
                 android:text=""/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="10dp"
+                android:textSize="20sp"
                 android:id="@+id/playerScore4"
                 android:text=""/>
         </TableRow>
@@ -101,12 +112,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="10dp"
+                android:textSize="20sp"
                 android:id="@+id/playerName5"
                 android:text=""/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="10dp"
+                android:textSize="20sp"
                 android:id="@+id/playerScore5"
                 android:text=""/>
         </TableRow>

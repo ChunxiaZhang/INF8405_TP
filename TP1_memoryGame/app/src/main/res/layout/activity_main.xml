@@ -3,6 +3,7 @@
     android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="@drawable/room"
     android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".MainActivity">
 
 
@@ -26,24 +27,34 @@
             android:text="@string/btnTwoPlayers_text"
             android:layout_margin="40dp"
             android:layout_weight="2"
-            />
+            android:background="@drawable/button_img"
+            android:textStyle="bold"/>
         <Button
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:id="@+id/btnWithRobot"
             android:layout_margin="40dp"
-            android:text="@string/btnWithRobot_text"/>
+            android:layout_weight="2"
+            android:background="@drawable/button_img"
+            android:text="@string/btnWithRobot_text"
+            android:textStyle="bold"/>
         <Button
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:id="@+id/btnScores"
             android:layout_margin="40dp"
+            android:layout_weight="2"
+            android:background="@drawable/button_img"
+            android:textStyle="bold"
             android:text="@string/btnScores_text"/>
         <Button
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:id="@+id/btnExit"
             android:layout_margin="40dp"
+            android:layout_weight="2"
+            android:background="@drawable/button_img"
+            android:textStyle="bold"
             android:text="@string/btnExit_text"/>
         </LinearLayout>
 

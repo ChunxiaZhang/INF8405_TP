@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent"
     android:padding="15dp"
+    android:background="@drawable/room"
     android:orientation="vertical">
 
     <TextView
@@ -9,10 +10,11 @@
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:id="@+id/playerNameTextView1"
+        android:textSize="25dp"
         android:text="@string/onePlayerName"/>
     <EditText
         android:id="@+id/playerOne"
-        android:inputType="textEmailAddress"
+        android:inputType="textCapCharacters"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -25,11 +27,12 @@
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:id="@+id/playerNameTextView2"
+        android:textSize="25dp"
         android:text="@string/anotherPlayerName"
         android:paddingTop="40dp"/>
     <EditText
         android:id="@+id/PlayerTwo"
-        android:inputType="textEmailAddress"
+        android:inputType="textCapCharacters"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -40,7 +43,9 @@
     <Button
         android:id="@+id/btnGameStart"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_marginTop="80dp"
+        android:layout_height="50dp"
+        android:background="@drawable/button_img"
         android:text="@string/ok"/>
 
 </LinearLayout>

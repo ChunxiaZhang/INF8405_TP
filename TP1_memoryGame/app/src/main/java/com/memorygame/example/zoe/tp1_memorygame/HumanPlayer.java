@@ -46,7 +46,6 @@ public class HumanPlayer extends Player{
 
                     /**
                      * After second piece chose send message to mainHandler
-                     * Let GameActivity delay 1 second before update interface?????????
                      */
                     gameActivity.mainHandler.sendMessageDelayed(matchMsg,1000);
                 }

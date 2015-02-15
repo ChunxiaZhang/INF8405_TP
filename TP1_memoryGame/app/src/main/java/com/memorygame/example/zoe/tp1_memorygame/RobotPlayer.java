@@ -38,7 +38,6 @@ public class RobotPlayer extends Player{
 
                 /**
                  * After choose the second piece send message to mainHandler
-                 * and let delay 1 second before update interface?????????
                  */
                 gameActivity.mainHandler.sendMessageDelayed(matchMsg,1000);
             }
