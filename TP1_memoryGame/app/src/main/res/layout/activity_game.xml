@@ -16,30 +16,33 @@
 
         <TextView
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:text="Medium Text"
             android:id="@+id/scorePlayer1"
             android:background="@drawable/textviewborder"
             android:padding="8dp"
+            android:layout_weight="9"
             android:layout_marginLeft="15dp"
             android:layout_gravity="left" />
 
         <TableLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_gravity="center_horizontal"
             android:id="@+id/gameViewTable"
+            android:layout_weight="2"
             ></TableLayout>
 
         <TextView
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:text="Medium Text"
             android:id="@+id/scorePlayer2"
             android:background="@drawable/textviewborder"
             android:padding="8dp"
+            android:layout_weight="9"
             android:layout_marginRight="15dp"
             android:layout_gravity="right" />
 

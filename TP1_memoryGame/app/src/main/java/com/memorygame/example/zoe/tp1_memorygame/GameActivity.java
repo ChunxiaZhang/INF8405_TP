@@ -203,9 +203,18 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
     private TableRow createRow(int x)
     {
         TableRow row = new TableRow(gameTable.getContext());
+        TableLayout.LayoutParams tabelParams = new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT,
+                TableLayout.LayoutParams.MATCH_PARENT);
+        tabelParams.weight = 1.0f;
+
+        row.setLayoutParams(tabelParams);
         row.setHorizontalGravity(Gravity.CENTER);
         for(int y = 0; y < COL_COUNT; y++) {
             ImageButton button = createImageButton(x, y);
+            TableRow.LayoutParams rowParams = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT,
+                    TableRow.LayoutParams.MATCH_PARENT);
+            rowParams.weight = 1.0f;
+            button.setLayoutParams(rowParams);
             row.addView(button);
             Piece piece = new Piece(x, y,x*COL_COUNT+y, piecesImgClasses.get(x).get(y), images.get(piecesImgClasses.get(x).get(y)), backImage, button);
             piecesList.add(piece);
