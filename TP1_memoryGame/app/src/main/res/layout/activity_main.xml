@@ -21,7 +21,7 @@
 
 
         <Button
-            android:layout_width="match_parent"
+            android:layout_width="fill_parent"
             android:layout_height="50dp"
             android:id="@+id/btnTwoPlayers"
             android:text="@string/btnTwoPlayers_text"

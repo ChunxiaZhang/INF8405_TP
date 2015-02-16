@@ -71,7 +71,7 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
                          * Send message to robot play thread, let robot choose pieces
                          */
                         playerTwo.playerHandler.sendEmptyMessage(0);
-                    }
+                    } 
                     if(isFirstPlayer) nbImgTurned = 0;
                 }else{
                     //If robot chose two pieces than turn the two pieces, after 1 second GameActivity update
