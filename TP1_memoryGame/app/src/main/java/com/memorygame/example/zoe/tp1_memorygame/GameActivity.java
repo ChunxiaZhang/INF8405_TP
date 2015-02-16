@@ -15,6 +15,7 @@ import android.view.KeyEvent;
 import android.view.View;
 
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -236,6 +237,7 @@ public class GameActivity extends ActionBarActivity implements GameFinishDialogF
                     int numCol = btnId%COL_COUNT;
                     //Turn image
                     button.setBackgroundDrawable(images.get(piecesImgClasses.get(numRow).get(numCol)));
+                    button.setScaleType(ImageButton.ScaleType.CENTER_CROP);
                     nbImgTurned++;
 
                     Message humanPlayerMsg = new Message();
