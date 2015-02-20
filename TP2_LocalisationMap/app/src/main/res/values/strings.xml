@@ -3,5 +3,16 @@
 
     <string name="app_name">TP2_LocalisationMap</string>
     <string name="title_activity_maps">Map</string>
+    <string name="title_activity_menu">Menu</string>
+
+    <string name="action_settings">Settings</string>
+
+    <string name="mode">Mode</string>
+    <string name="GPS">GPS</string>
+    <string name="network">Mobile network</string>
+    <string name="zoom">Zoom</string>
+    <string name="start">Start</string>
+    <string name="itineraryHistory">Last  3 Itineraries</string>
+    <string name="exit">Exit</string>
 
 </resources>
