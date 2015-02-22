@@ -35,7 +35,7 @@ public class MapsActivity extends FragmentActivity {
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
-    private ImageButton btn_loc, btn_destination, btn_start_stop, btn_power;
+    private ImageButton btn_destination, btn_start_stop, btn_power;
     private PopupWindow destinationPopup;
     private View destinationView;
 
@@ -48,7 +48,9 @@ public class MapsActivity extends FragmentActivity {
     private ZoomLevel zoomLevel = new ZoomLevel();
     private Frequency frequency = new Frequency();
 
+    final Tp2LocationListener listener = new Tp2LocationListener();
 
+    private boolean isOpenTracking = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,13 +58,16 @@ public class MapsActivity extends FragmentActivity {
         setContentView(R.layout.activity_maps);
 
         power = new Power(getApplicationContext());
-        zoomLevel = new ZoomLevel();
+        zoomLevel.setZoomLevel(getIntent().getIntExtra("zoom", zoomLevel.getZoomLevel()));
+        frequency.setTime(getIntent().getIntExtra("frequency", frequency.getTime()));
+
+        isOpenTracking = false;
+
+        setUpMapIfNeeded();
 
         setUpButtons();
 
         setUpPopupDestination();
-
-        setUpMapIfNeeded();
 
     }
 
@@ -139,31 +144,6 @@ public class MapsActivity extends FragmentActivity {
                 .build();                   // Creates a CameraPosition from the builder
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
-        locationManager.requestLocationUpdates(provider, frequency.getTime(), 8, new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-
-                updateToNewLocation(location);
-            }
-
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-
-            }
-
-            @Override
-            public void onProviderEnabled(String provider) {
-
-                //When GPS LocationProvider enabled
-                location = locationManager.getLastKnownLocation(provider);
-            }
-
-            @Override
-            public void onProviderDisabled(String provider) {
-
-                updateToNewLocation(null);
-            }
-        });
     }
 
     private void initProvider() {
@@ -202,17 +182,31 @@ public class MapsActivity extends FragmentActivity {
 
     private void setUpButtons() {
 
-        btn_loc = (ImageButton) findViewById(R.id.btn_location);
         btn_destination = (ImageButton) findViewById(R.id.btn_destination);
         btn_start_stop = (ImageButton) findViewById(R.id.btn_start_stop);
         btn_power = (ImageButton) findViewById(R.id.btn_power);
 
-        btn_loc.setOnClickListener(new View.OnClickListener() {
+        if(isOpenTracking) {
+            btn_start_stop.setBackground(getResources().getDrawable(R.drawable.stop));
+        }
+        else {
+            btn_start_stop.setBackground(getResources().getDrawable(R.drawable.start));
+        }
+
+        btn_start_stop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(),location.getLongitude()), zoomLevel.getZoomLevel()));
-
+                if(isOpenTracking) {
+                    locationManager.removeUpdates(listener);
+                    btn_start_stop.setBackground(getResources().getDrawable(R.drawable.start));
+                    isOpenTracking = false;
+                }
+                else {
+                    locationManager.requestLocationUpdates(provider, frequency.getTime(), 8, listener);
+                    btn_start_stop.setBackground(getResources().getDrawable(R.drawable.stop));
+                    isOpenTracking = true;
+                }
             }
         });
 
@@ -259,5 +253,29 @@ public class MapsActivity extends FragmentActivity {
     }
 
 
+    private final class Tp2LocationListener implements LocationListener {
+        @Override
+        public void onLocationChanged(Location location) {
+
+            updateToNewLocation(location);
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+
+            location = locationManager.getLastKnownLocation(provider);
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+
+            updateToNewLocation(null);
+        }
+    }
 
 }

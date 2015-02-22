@@ -14,6 +14,8 @@
     <string name="start">Start</string>
     <string name="itineraryHistory">Last  3 Itineraries</string>
     <string name="exit">Exit</string>
+    <string name="openmap">Open Map</string>
 
     <string name="setdestination">Destination</string>
+    <string name="frequency">Frequency</string>
 </resources>

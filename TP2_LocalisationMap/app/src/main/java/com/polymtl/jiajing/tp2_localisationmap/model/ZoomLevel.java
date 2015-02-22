@@ -5,17 +5,17 @@ package com.polymtl.jiajing.tp2_localisationmap.model;
  */
 public class ZoomLevel {
 
-    private float zoomLevel;
+    private int zoomLevel;
 
     public ZoomLevel() {
         this.zoomLevel = 17;
     }
 
-    public void setZoomLevel(float zoomLevel) {
+    public void setZoomLevel(int zoomLevel) {
         this.zoomLevel = zoomLevel;
     }
 
-    public float getZoomLevel() {
+    public int getZoomLevel() {
         return this.zoomLevel;
     }
 }

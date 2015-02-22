@@ -16,37 +16,25 @@
         android:layout_height="60dp"
         android:orientation="horizontal"
         android:layout_centerVertical="true"
-        android:layout_alignParentBottom="true"
-        >
+        android:layout_alignParentBottom="true" >
 
         <ImageButton
-            android:layout_width="match_parent"
+            android:layout_width="60dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:id="@+id/btn_location"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
-            android:background="@drawable/location"/>
-        <ImageButton
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:id="@+id/btn_destination"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:background="@drawable/destination"/>
         <ImageButton
-            android:layout_width="match_parent"
+            android:layout_width="60dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:id="@+id/btn_start_stop"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:background="@drawable/start"/>
         <ImageButton
-            android:layout_width="match_parent"
+            android:layout_width="60dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:id="@+id/btn_power"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
