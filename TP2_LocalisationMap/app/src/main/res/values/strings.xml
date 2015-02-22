@@ -15,4 +15,5 @@
     <string name="itineraryHistory">Last  3 Itineraries</string>
     <string name="exit">Exit</string>
 
+    <string name="setdestination">Destination</string>
 </resources>

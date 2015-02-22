@@ -1,22 +1,69 @@
 package com.polymtl.jiajing.tp2_localisationmap;
 
+import android.content.Context;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.polymtl.jiajing.tp2_localisationmap.model.Frequency;
+import com.polymtl.jiajing.tp2_localisationmap.model.Power;
+import com.polymtl.jiajing.tp2_localisationmap.model.ZoomLevel;
+
+import java.util.List;
 
 public class MapsActivity extends FragmentActivity {
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
+    private ImageButton btn_loc, btn_destination, btn_start_stop, btn_power;
+    private PopupWindow destinationPopup;
+    private View destinationView;
+
+    private LocationManager locationManager;
+    private Location location;
+    private String provider = LocationManager.GPS_PROVIDER;
+    private MarkerOptions markerOpt;
+
+    private Power power;
+    private ZoomLevel zoomLevel = new ZoomLevel();
+    private Frequency frequency = new Frequency();
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        power = new Power(getApplicationContext());
+        zoomLevel = new ZoomLevel();
+
+        setUpButtons();
+
+        setUpPopupDestination();
+
         setUpMapIfNeeded();
+
     }
 
     @Override
@@ -41,13 +88,22 @@ public class MapsActivity extends FragmentActivity {
      * method in {@link #onResume()} to guarantee that it will be called.
      */
     private void setUpMapIfNeeded() {
+
+        //Create LoacationManager and get Provider
+        initProvider();
+
         // Do a null check to confirm that we have not already instantiated the map.
         if (mMap == null) {
             // Try to obtain the map from the SupportMapFragment.
-            mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
+            mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapView))
                     .getMap();
+
+            // Set current location
+            mMap.setMyLocationEnabled(true);
+
             // Check if we were successful in obtaining the map.
             if (mMap != null) {
+
                 setUpMap();
             }
         }
@@ -60,6 +116,148 @@ public class MapsActivity extends FragmentActivity {
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
-        mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+        //mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+
+        //Initial Camera to the current location
+        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(),location.getLongitude()), zoomLevel.getZoomLevel()));
+
+        // Move the camera instantly to Montreal.
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(45.527593, -73.597179), 15));
+
+        // Zoom in, animating the camera.
+        mMap.animateCamera(CameraUpdateFactory.zoomIn());
+
+        // Zoom out to zoom level 10, animating with a duration of 2 seconds.
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(10), 2000, null);
+
+        // Construct a CameraPosition focusing on Mountain View and animate the camera to that position.
+        CameraPosition cameraPosition = new CameraPosition.Builder()
+                .target(new LatLng(location.getLatitude(), location.getLongitude()))      // Sets the center of the map to Mountain View
+                .zoom(zoomLevel.getZoomLevel())                   // Sets the zoom
+                .bearing(90)                // Sets the orientation of the camera to east
+                .tilt(30)                   // Sets the tilt of the camera to 30 degrees
+                .build();                   // Creates a CameraPosition from the builder
+        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+        locationManager.requestLocationUpdates(provider, frequency.getTime(), 8, new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+
+                updateToNewLocation(location);
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+
+                //When GPS LocationProvider enabled
+                location = locationManager.getLastKnownLocation(provider);
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+
+                updateToNewLocation(null);
+            }
+        });
     }
+
+    private void initProvider() {
+        //Create LocationManager object
+        locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+
+        //List all providers
+        //List<String> providers = locationManager.getAllProviders();
+        //Criteria criteria = new Criteria();
+        //bestProvider = locationManager.getBestProvider(criteria,false);
+        location = locationManager.getLastKnownLocation(provider);
+    }
+
+    private void updateToNewLocation(Location location) {
+
+        markerOpt = new MarkerOptions();
+        double dLong = location.getLongitude();
+        double dLat = location.getLatitude();
+
+        markerOpt.position(new LatLng(dLat,dLong));
+        markerOpt.draggable(false);
+        markerOpt.visible(true);
+        markerOpt.anchor(0.5f, 0.5f);//set to be center of the picture
+        markerOpt.icon(BitmapDescriptorFactory.fromResource((R.drawable.marker)));
+        mMap.addMarker(markerOpt);
+
+        // Construct a CameraPosition focusing on Mountain View and animate the camera to that position.
+        CameraPosition cameraPosition = new CameraPosition.Builder()
+                .target(new LatLng(dLat, -dLong))      // Sets the center of the map to Mountain View
+                .zoom(zoomLevel.getZoomLevel())                   // Sets the zoom
+                .bearing(90)                // Sets the orientation of the camera to east
+                .tilt(30)                   // Sets the tilt of the camera to 30 degrees
+                .build();                   // Creates a CameraPosition from the builder
+        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+    }
+
+    private void setUpButtons() {
+
+        btn_loc = (ImageButton) findViewById(R.id.btn_location);
+        btn_destination = (ImageButton) findViewById(R.id.btn_destination);
+        btn_start_stop = (ImageButton) findViewById(R.id.btn_start_stop);
+        btn_power = (ImageButton) findViewById(R.id.btn_power);
+
+        btn_loc.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(),location.getLongitude()), zoomLevel.getZoomLevel()));
+
+            }
+        });
+
+    }
+
+
+    private void setUpPopupDestination() {
+
+        /*LayoutInflater inflater = LayoutInflater.from(this);
+        destinationView = inflater.inflate(R.layout.popup_destination, null);
+        destinationPopup = new PopupWindow(destinationView,
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        final EditText destinationText = (EditText) destinationView.findViewById(R.id.destinationEdit);
+        final ImageButton btn_search = (ImageButton) destinationView.findViewById(R.id.btn_searchDestination);
+
+        destinationText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                btn_search.setEnabled(false);
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+                if(destinationText.getText().length() > 0) {
+                    btn_search.setEnabled(true);
+                }
+            }
+        });
+
+        btn_search.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                destinationPopup.dismiss();
+                destinationPopup.setFocusable(false);
+            }
+        });*/
+
+    }
+
+
+
 }

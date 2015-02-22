@@ -9,7 +9,7 @@ public class Marker {
     private enum Direction{
         EAST,SOUTH,WEST,NORTH,SOUTH_EAST,SOUTH_WEST,NORTH_EAST,NORTH_WEST;
     }
-    private GeoPoint coord;
+    //private GeoPoint coord;
     private Time im;
     private Direction Dir_dep;
 
