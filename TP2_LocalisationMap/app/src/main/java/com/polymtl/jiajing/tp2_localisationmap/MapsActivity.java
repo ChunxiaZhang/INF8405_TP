@@ -155,6 +155,7 @@ public class MapsActivity extends FragmentActivity {
         //Criteria criteria = new Criteria();
         //bestProvider = locationManager.getBestProvider(criteria,false);
         location = locationManager.getLastKnownLocation(provider);
+
     }
 
     private void updateToNewLocation(Location location) {
