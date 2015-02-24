@@ -7,7 +7,12 @@ import android.location.Location;
  */
 public class BetweenMarkers {
 
+    private Marker markerA, markerB;
+
     private Location locationA, locationB;
+
+    private Power powerA, powerB;
+    private float powerConsumption;
 
     private enum Direction{
         EAST,SOUTH,WEST,NORTH,SOUTH_EAST,SOUTH_WEST,NORTH_EAST,NORTH_WEST;
@@ -17,9 +22,16 @@ public class BetweenMarkers {
 
     private Direction Dir_dep;
 
-    public BetweenMarkers(Location locationA, Location locationB) {
-        this.locationA = locationA;
-        this.locationB = locationB;
+    public BetweenMarkers(Marker markerA, Marker markerB) {
+        this.markerA = markerA;
+        this.markerB = markerB;
+
+        this.locationA = markerA.getLocation();
+        this.locationB = markerB.getLocation();
+
+        this.powerA = markerA.getNiv_batt();
+        this.powerB = markerB.getNiv_batt();
+
     }
 
     public float getDrp() {
@@ -28,6 +40,11 @@ public class BetweenMarkers {
 
     public float getVm() {
         return getDrp()/(locationB.getTime() - locationA.getTime());
+    }
+
+    public float getPowerConsumption() {
+        this.powerConsumption = powerA.getPowerLever() - powerB.getPowerLever();
+        return this.powerConsumption;
     }
 
     //calculate direction from locationB to locationA

@@ -43,5 +43,11 @@ public class Marker {
         return this.altitude;
     }
 
+    public Location getLocation() {
+        return this.location;
+    }
 
+    public Power getNiv_batt() {
+        return this.Niv_batt;
+    }
 }

@@ -1,5 +1,6 @@
 package com.polymtl.jiajing.tp2_localisationmap.model;
 
+import android.content.Context;
 import android.location.Location;
 
 /**
@@ -9,4 +10,5 @@ public class MarkerGPS extends Marker{
     public MarkerGPS(Location location) {
         super(location);
     }
+
 }
