@@ -32,8 +32,4 @@ public class Power {
         //return batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)/batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE,-1) * 100.0f;
     }
 
-    public float getConsumption(float level1, float level2) {
-
-        return level1 - level2;
-    }
 }
