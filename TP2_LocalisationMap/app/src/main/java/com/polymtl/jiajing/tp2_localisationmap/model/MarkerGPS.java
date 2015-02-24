@@ -7,8 +7,17 @@ import android.location.Location;
  * Created by Zoe on 15-02-23.
  */
 public class MarkerGPS extends Marker{
-    public MarkerGPS(Location location) {
+
+    private ConnectGPSInfo connectInfo;
+
+    public MarkerGPS(Location location, ConnectGPSInfo connectInfo) {
+
         super(location);
+        this.connectInfo = connectInfo;
+    }
+
+    public ConnectGPSInfo getConnectInfo() {
+        return this.connectInfo;
     }
 
 }
