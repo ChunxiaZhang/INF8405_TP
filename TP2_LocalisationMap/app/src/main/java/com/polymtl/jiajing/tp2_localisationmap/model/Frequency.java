@@ -12,7 +12,7 @@ public class Frequency {
         this.time = 30; //Initial 30s
     }
 
-    public int getTime() {
+    public int getFrequency() {
         return  this.time;
     }
 

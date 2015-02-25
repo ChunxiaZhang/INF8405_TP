@@ -9,15 +9,20 @@ import android.location.Location;
 public class MarkerGPS extends Marker{
 
     private ConnectGPSInfo connectInfo;
+    private String info;
 
-    public MarkerGPS(Location location, ConnectGPSInfo connectInfo) {
+    public MarkerGPS(Location location, Context context, ConnectGPSInfo connectInfo) {
 
-        super(location);
+        super(location, context);
         this.connectInfo = connectInfo;
     }
 
     public ConnectGPSInfo getConnectInfo() {
         return this.connectInfo;
+    }
+
+    public String getInfo() {
+        return connectInfo.getInfo();
     }
 
 }

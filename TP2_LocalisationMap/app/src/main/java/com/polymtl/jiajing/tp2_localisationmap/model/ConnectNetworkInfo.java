@@ -12,6 +12,7 @@ import android.telephony.CellSignalStrengthLte;
 import android.telephony.CellSignalStrengthWcdma;
 import android.telephony.TelephonyManager;
 import android.telephony.cdma.CdmaCellLocation;
+import android.telephony.gsm.GsmCellLocation;
 
 
 /**
@@ -22,6 +23,7 @@ public class ConnectNetworkInfo implements ConnectInfo {
     private Context context;
     private TelephonyManager telephonyManager;
     private CdmaCellLocation cdmaCellLocation;
+    private GsmCellLocation gsmCellLocation;
     private int networkType;
     private int phoneType;
     private String MCC; //Mobile country code
@@ -30,10 +32,15 @@ public class ConnectNetworkInfo implements ConnectInfo {
     private float long_sb, lat_sb;
     private int Niv_sig_sb; //niveau du signal
 
+    private int Cell_ID;
+    private int LAC; //Loction Area Code
+
+
     public ConnectNetworkInfo(Context context) {
         this.context = context;
         telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         cdmaCellLocation = (CdmaCellLocation) telephonyManager.getCellLocation();
+        gsmCellLocation = (GsmCellLocation) telephonyManager.getCellLocation();
     }
 
     public int getNetworkType() {
@@ -130,9 +137,27 @@ public class ConnectNetworkInfo implements ConnectInfo {
         return this.Niv_sig_sb;
     }
 
+    public int getCell_ID() {
+
+        if (telephonyManager.getPhoneType() == TelephonyManager.PHONE_TYPE_GSM) {
+            this.Cell_ID = gsmCellLocation.getCid();
+        }
+        //else ???????
+        return this.Cell_ID;
+    }
+
+    public int getLAC() {
+
+        if (telephonyManager.getPhoneType() == TelephonyManager.PHONE_TYPE_GSM) {
+            this.LAC = gsmCellLocation.getLac();
+        }
+        //else ???????
+        return this.LAC;
+    }
+
     //What's the format  ????????????????
     @Override
-    public String getConnectInfo() {
+    public String getInfo() {
         return null;
     }
 }

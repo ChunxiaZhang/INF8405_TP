@@ -16,6 +16,10 @@
     <string name="exit">Exit</string>
     <string name="openmap">Open Map</string>
 
-    <string name="setdestination">Destination</string>
+    <string name="setdestination">Destination:</string>
+    <string name="setfrom">From:</string>
     <string name="frequency">Frequency</string>
+    <string name="title_activity_from_to">FromToActivity</string>
+
+    <string name="hello_world">Hello world!</string>
 </resources>

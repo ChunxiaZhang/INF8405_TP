@@ -16,7 +16,7 @@ public class ConnectGPSInfo implements ConnectInfo {
     }
 
     @Override
-    public String getConnectInfo() {
+    public String getInfo() {
 
         WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         WifiInfo wifiInfo = wifiManager.getConnectionInfo();

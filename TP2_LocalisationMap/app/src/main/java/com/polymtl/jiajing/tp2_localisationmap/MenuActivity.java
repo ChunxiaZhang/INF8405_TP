@@ -113,7 +113,7 @@ public class MenuActivity extends ActionBarActivity {
             public void onClick(View v) {
                 Intent i = new Intent(MenuActivity.this, MapsActivity.class);
                 i.putExtra("connectMode", mode.getProvider());
-                i.putExtra("frequency", frequency.getTime());
+                i.putExtra("frequency", frequency.getFrequency());
                 i.putExtra("zoom", zoomLevel.getZoomLevel());
                 startActivity(i); //Send two players' name to GameActivity
             }

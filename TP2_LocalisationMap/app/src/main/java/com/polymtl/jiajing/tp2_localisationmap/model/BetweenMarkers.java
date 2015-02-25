@@ -1,6 +1,16 @@
 package com.polymtl.jiajing.tp2_localisationmap.model;
 
+import android.graphics.Color;
 import android.location.Location;
+
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Zoe on 15-02-23.
@@ -11,7 +21,7 @@ public class BetweenMarkers {
 
     private Location locationA, locationB;
 
-    private Power powerA, powerB;
+    private float powerLevelA, powerLevelB;
     private float powerConsumption;
 
     private enum Direction{
@@ -29,8 +39,8 @@ public class BetweenMarkers {
         this.locationA = markerA.getLocation();
         this.locationB = markerB.getLocation();
 
-        this.powerA = markerA.getNiv_batt();
-        this.powerB = markerB.getNiv_batt();
+        this.powerLevelA = markerA.getNiv_batt();
+        this.powerLevelB = markerB.getNiv_batt();
 
     }
 
@@ -43,7 +53,7 @@ public class BetweenMarkers {
     }
 
     public float getPowerConsumption() {
-        this.powerConsumption = powerA.getPowerLever() - powerB.getPowerLever();
+        this.powerConsumption = powerLevelA - powerLevelB;
         return this.powerConsumption;
     }
 
@@ -119,5 +129,17 @@ public class BetweenMarkers {
 
         return direction;
     }
+
+    ////????????????this method put here well or not??????
+    /*public void drawLineBetweenTwoMarkers(GoogleMap map, LatLng from, LatLng to) {
+        List<LatLng> points = new ArrayList<LatLng>();
+        points.add(from);
+        points.add(to);
+
+        map.addPolyline(new PolylineOptions()
+             .add(from, to)
+             .width(5)
+             .color(Color.RED));
+    }*/
 
 }
