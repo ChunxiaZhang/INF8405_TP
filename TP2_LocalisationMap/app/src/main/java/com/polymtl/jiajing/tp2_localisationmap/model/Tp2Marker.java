@@ -1,18 +1,23 @@
 package com.polymtl.jiajing.tp2_localisationmap.model;
 
 import android.content.Context;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.IOException;
 import java.sql.Time;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Jiajing on 2015/2/20.
  */
-public class Marker implements ConnectInfo {
+public class Tp2Marker implements ConnectInfo {
 
     //Coord
     private double latitude;
@@ -30,9 +35,12 @@ public class Marker implements ConnectInfo {
 
     private Location location;
 
-    public Marker() {};
+    private Geocoder geocoder;
+    private String address;
 
-    public Marker(Location location, Context context) {
+    public Tp2Marker() {};
+
+    public Tp2Marker(Location location, Context context) {
         this.location = location;
         power = new Power(context);
 
@@ -47,6 +55,8 @@ public class Marker implements ConnectInfo {
         this.Im = location.getTime();
 
         this.Mod_loc =  location.getProvider();
+
+        this.geocoder = new Geocoder(context);
     }
 
     public double getAltitude() {
@@ -96,6 +106,24 @@ public class Marker implements ConnectInfo {
         return this.location;
     }
 
+    public String getAddress() {
+
+        List<Address> addresses = new ArrayList<>();
+        try {
+            addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+            if (addresses.size() > 0) {
+
+                for (int i = 0; i < addresses.get(0).getMaxAddressLineIndex(); i++) {
+                    this.address += addresses.get(0).getAddressLine(i) + "\n";
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        return this.address;
+    }
 
 
     @Override

@@ -5,10 +5,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import com.polymtl.jiajing.tp2_localisationmap.model.Itinerary;
-import com.polymtl.jiajing.tp2_localisationmap.model.Marker;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -6,7 +6,7 @@ import android.location.Location;
 /**
  * Created by Zoe on 15-02-23.
  */
-public class MarkerGPS extends Marker{
+public class MarkerGPS extends Tp2Marker {
 
     private ConnectGPSInfo connectInfo;
     private String info;

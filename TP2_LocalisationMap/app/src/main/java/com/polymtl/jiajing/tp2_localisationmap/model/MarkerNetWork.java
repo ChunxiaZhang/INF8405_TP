@@ -7,7 +7,7 @@ import android.net.NetworkInfo;
 /**
  * Created by Zoe on 15-02-23.
  */
-public class MarkerNetwork extends Marker {
+public class MarkerNetwork extends Tp2Marker {
 
     private ConnectNetworkInfo connectInfo;
     private String info;

@@ -1,23 +1,13 @@
 package com.polymtl.jiajing.tp2_localisationmap.model;
 
-import android.graphics.Color;
 import android.location.Location;
-
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Zoe on 15-02-23.
  */
 public class BetweenMarkers {
 
-    private Marker markerA, markerB;
+    private Tp2Marker tp2MarkerA, tp2MarkerB;
 
     private Location locationA, locationB;
 
@@ -32,15 +22,15 @@ public class BetweenMarkers {
 
     private Direction Dir_dep;
 
-    public BetweenMarkers(Marker markerA, Marker markerB) {
-        this.markerA = markerA;
-        this.markerB = markerB;
+    public BetweenMarkers(Tp2Marker tp2MarkerA, Tp2Marker tp2MarkerB) {
+        this.tp2MarkerA = tp2MarkerA;
+        this.tp2MarkerB = tp2MarkerB;
 
-        this.locationA = markerA.getLocation();
-        this.locationB = markerB.getLocation();
+        this.locationA = tp2MarkerA.getLocation();
+        this.locationB = tp2MarkerB.getLocation();
 
-        this.powerLevelA = markerA.getNiv_batt();
-        this.powerLevelB = markerB.getNiv_batt();
+        this.powerLevelA = tp2MarkerA.getNiv_batt();
+        this.powerLevelB = tp2MarkerB.getNiv_batt();
 
     }
 
