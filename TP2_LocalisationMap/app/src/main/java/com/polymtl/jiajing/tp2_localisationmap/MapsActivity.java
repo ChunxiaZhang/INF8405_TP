@@ -5,10 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 
-import android.content.Intent;
-import android.graphics.Color;
 import android.location.LocationProvider;
-import android.os.AsyncTask;
 
 import android.location.Address;
 
@@ -17,11 +14,9 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 
-import android.provider.Settings;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
-import android.telephony.TelephonyManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -35,23 +30,14 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
-
-import com.google.android.gms.maps.model.PolylineOptions;
 import com.polymtl.jiajing.tp2_localisationmap.model.ConnectGPSInfo;
-import com.polymtl.jiajing.tp2_localisationmap.model.ConnectInfo;
 import com.polymtl.jiajing.tp2_localisationmap.model.ConnectMode;
 import com.polymtl.jiajing.tp2_localisationmap.model.ConnectNetworkInfo;
 import com.polymtl.jiajing.tp2_localisationmap.model.Frequency;
@@ -61,13 +47,19 @@ import com.polymtl.jiajing.tp2_localisationmap.model.MarkerNetwork;
 import com.polymtl.jiajing.tp2_localisationmap.model.Tp2Marker;
 import com.polymtl.jiajing.tp2_localisationmap.model.Power;
 import com.polymtl.jiajing.tp2_localisationmap.model.ZoomLevel;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.polymtl.jiajing.tp2_localisationmap.service.AdjustCamera;
+import com.polymtl.jiajing.tp2_localisationmap.service.DetectConnectivity;
+import com.polymtl.jiajing.tp2_localisationmap.service.DrawPathAsyncTask;
+import com.polymtl.jiajing.tp2_localisationmap.service.DrawTp2Marker;
+import com.polymtl.jiajing.tp2_localisationmap.service.Tp2InfoWindowAdapter;
+import com.polymtl.jiajing.tp2_localisationmap.service.Tp2PolyLine;
+import com.polymtl.jiajing.tp2_localisationmap.tp2Test.TestData;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import static com.polymtl.jiajing.tp2_localisationmap.service.Tp2PolyLine.*;
 
 
 public class MapsActivity extends FragmentActivity {
@@ -85,8 +77,6 @@ public class MapsActivity extends FragmentActivity {
     private LocationManager locationManager;
     private Location location;
     private String provider; //
-    private MarkerOptions markerOpt;
-    private Polyline lineDestination, lineItinerary;
 
     //private ConnectMode connectMode;
     private Power power;
@@ -94,11 +84,11 @@ public class MapsActivity extends FragmentActivity {
     private Frequency frequency = new Frequency();
     private ConnectMode connectMode = new ConnectMode();
 
-    final Tp2LocationListener listener = new Tp2LocationListener();
+    final Tp2LocationListener tp2Locationlistener = new Tp2LocationListener();
 
-    private Tp2InfoWindowAdapter infoWindow = new Tp2InfoWindowAdapter();
 
-   // private Itinerary itinerary;
+
+    private Itinerary thisItinerary;
     private Itinerary testItinerary; //used for testing
 
     private boolean isOpenTracking = false;
@@ -210,23 +200,9 @@ public class MapsActivity extends FragmentActivity {
             return;
         }
 
-      // Zoom in, animating the camera.
-        mMap.animateCamera(CameraUpdateFactory.zoomIn());
-
-        // Zoom out to zoom level 10, animating with a duration of 2 seconds.
-        Log.i("setUpMap: " , "Zoom out to zoom level 10, animating with a duration of 2 seconds.");
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(10), 2000, null);
-
-        // Construct a CameraPosition focusing on Mountain View and animate the camera to that position.
-        CameraPosition cameraPosition = new CameraPosition.Builder()
-                .target(new LatLng(location.getLatitude(), location.getLongitude()))      // Sets the center of the map to Mountain View
-                .zoom(zoomLevel.getZoomLevel())                   // Sets the zoom
-                .bearing(90)                // Sets the orientation of the camera to east
-                .tilt(30)                   // Sets the tilt of the camera to 30 degrees
-                .build();                   // Creates a CameraPosition from the builder
-        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-        Log.i("setUpMap: " , "newCameraPosition is done");
-
+        LatLng latLng = new LatLng(location.getLatitude(),location.getLongitude());
+        DrawTp2Marker.setTp2Marker(MapsActivity.this, mMap, latLng);
+        AdjustCamera.moveCamera(mMap,latLng, zoomLevel.getZoomLevel());
 
     }
 
@@ -235,36 +211,10 @@ public class MapsActivity extends FragmentActivity {
     private void updateToNewLocation(Location location) {
 
         Log.i("updatTonewLocation: " , "start");
-        markerOpt = new MarkerOptions();
-        double dLong = location.getLongitude();
-        double dLat = location.getLatitude();
 
-       markerOpt.position(new LatLng(dLat,dLong));
-        markerOpt.draggable(false);
-        markerOpt.visible(true);
-        markerOpt.anchor(0.5f, 0.5f);//set to be center of the picture
-        markerOpt.icon(BitmapDescriptorFactory.fromResource((R.drawable.marker)));
-        mMap.addMarker(markerOpt);
-        mMap.setInfoWindowAdapter(infoWindow);
-        Log.i("updatTonewLocation: " , "addMarker");
-
-        //mMap.addMarker(new MarkerOptions().position(new LatLng(dLat,dLong)).anchor(0.5f, 0.5f).title("Marker"));
-
-        // Zoom in, animating the camera.
-        mMap.animateCamera(CameraUpdateFactory.zoomIn());
-
-        // Zoom out to zoom level 10, animating with a duration of 2 seconds.
-        Log.i("setUpMap: " , "Zoom out to zoom level 10, animating with a duration of 2 seconds.");
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(10), 2000, null);
-
-        // Construct a CameraPosition focusing on Mountain View and animate the camera to that position.
-        CameraPosition cameraPosition = new CameraPosition.Builder()
-                .target(new LatLng(dLat, dLong))      // Sets the center of the map to Mountain View
-                .zoom(zoomLevel.getZoomLevel())                   // Sets the zoom
-                .bearing(90)                // Sets the orientation of the camera to east
-                .tilt(30)                   // Sets the tilt of the camera to 30 degrees
-                .build();                   // Creates a CameraPosition from the builder
-        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        DrawTp2Marker.setTp2Marker(MapsActivity.this, mMap, latLng);
+        AdjustCamera.moveCamera(mMap, latLng, zoomLevel.getZoomLevel());
     }
 
     private void setUpButtons() {
@@ -296,7 +246,7 @@ public class MapsActivity extends FragmentActivity {
                 }
 
                 if(isOpenTracking) { //stop tracking
-                    locationManager.removeUpdates(listener);
+                    locationManager.removeUpdates(tp2Locationlistener);
                     btn_start_stop.setBackground(getResources().getDrawable(R.drawable.start));
                     isOpenTracking = false;
 
@@ -306,21 +256,21 @@ public class MapsActivity extends FragmentActivity {
                     //Show all markers in the map and information about this itinerary
                     /////
                     //The test itinerary
-                    setTestItinerary();
+                    testItinerary = TestData.setTestItinerary(MapsActivity.this, provider);
                     showTestItinerary(testItinerary);
                 }
                 else { //start tracking
                     //Show battery level
                     Toast.makeText(context, "Battery level: " + power.getPowerLever(), Toast.LENGTH_LONG);
 
-                    //itinerary = new Itinerary(); //initial itinerary
+                    thisItinerary = new Itinerary();//initial this itinerary
 
                     //add the first marker
-                   // addTp2Marker();
-
+                    thisItinerary.increaseMarkers(new Tp2Marker(location, context));
 
                     //request listening location changed
-                    locationManager.requestLocationUpdates(provider, frequency.getFrequency(), 8, listener);
+                    //minDistance is 10 metres
+                    locationManager.requestLocationUpdates(provider, frequency.getFrequency(), 10, tp2Locationlistener);
                     btn_start_stop.setBackground(getResources().getDrawable(R.drawable.stop));
                     isOpenTracking = true;
                 }
@@ -374,18 +324,21 @@ public class MapsActivity extends FragmentActivity {
     private final class Tp2LocationListener implements LocationListener {
 
 
+        //Called when the location has changed.
         @Override
         public void onLocationChanged(Location location) {
 
+            Log.i("LocationListener: ", "Location changed");
             updateToNewLocation(location);
 
-            //
-            // addTp2Marker(); //add Tp2Marker
+            //add Tp2Marker
+            thisItinerary.increaseMarkers(new Tp2Marker(location, context));
 
             //Need to add marker to database ?????
             ///
         }
 
+        //Called when the provider status changes.
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
             switch (status) {
@@ -396,16 +349,21 @@ public class MapsActivity extends FragmentActivity {
             }
         }
 
+
+        //Called when the provider is enabled by the user.
         @Override
         public void onProviderEnabled(String provider) {
 
-            location = locationManager.getLastKnownLocation(provider);
+            Log.i("LocationListener: ", provider + ": Provider Enabled");
+            //location = locationManager.getLastKnownLocation(provider);
         }
 
+        //Called when the provider is disabled by the user.
         @Override
         public void onProviderDisabled(String provider) {
 
-            updateToNewLocation(null);
+            Log.i("LocationListener: ", provider + ": Provider Disabled");
+            //updateToNewLocation(null);
         }
     }
 
@@ -511,9 +469,10 @@ public class MapsActivity extends FragmentActivity {
                 destinationPopup.dismiss();
                 destinationPopup.setFocusable(false);
 
-                List<LatLng> points = new ArrayList<LatLng>();
+                List<LatLng> points = new ArrayList<>();
 
                 fromLatLng = getLocationFromAddress(addressFrom);
+
                 if (fromLatLng == null) {
                     //Set current location as from point
                     Location locationFrom = locationManager.getLastKnownLocation(provider);
@@ -521,351 +480,29 @@ public class MapsActivity extends FragmentActivity {
                     fromLatLng = new LatLng(locationFrom.getLatitude(), locationFrom.getLongitude());
                 }
                 toLatLng = getLocationFromAddress(addressTo);
+
                 if (toLatLng == null) {
                     Toast.makeText(getApplicationContext(), "Didn't find location of destination!", Toast.LENGTH_LONG).show();
                     return;
                 }
+                points.add(fromLatLng);
+                points.add(toLatLng);
 
-                new connectAsyncTask(makeURL(fromLatLng, toLatLng)).execute();
+                new DrawPathAsyncTask(mMap, fromLatLng,toLatLng, makeURL(fromLatLng, toLatLng)).execute();
+                DrawTp2Marker.setTp2Marker(MapsActivity.this, mMap, fromLatLng);
+                DrawTp2Marker.setTp2Marker(MapsActivity.this, mMap, toLatLng);
+
+                //InfoWindowAdapter show information
+                mMap.setInfoWindowAdapter(new Tp2InfoWindowAdapter(MapsActivity.this));
+
+                Log.i("destination:",points.size() + ": " + points.get(0).toString() + ", " + points.get(1));
+                AdjustCamera.fixZoom(mMap, points);
 
             }
         });
 
     }
 
-
-    //Show all the points in the map
-    private void fixZoom(List<LatLng> points) {
-        LatLngBounds.Builder bc = new LatLngBounds.Builder();
-        for (LatLng item : points) {
-            bc.include(item);
-        }
-        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bc.build(), 50));
-    }
-
-    private void drawLineBetweenTwoMarkers(LatLng from, LatLng to) {
-
-        mMap.addPolyline(new PolylineOptions()
-            .add(from, to)
-            .width(5)
-            .color(Color.RED));
-    }
-
-    /**
-     *
-     * @param result
-     * @param from
-     * @param to
-     *
-     * Draw path from start to end.
-     */
-    private void drawPath(String result, LatLng from, LatLng to) {
-
-        List<LatLng> points = new ArrayList<LatLng>();
-        points.add(from);
-        points.add(to);
-
-        if (lineDestination != null) {
-            mMap.clear();
-        }
-
-        mMap.addMarker(new MarkerOptions().position(from).snippet("from snippet").title("Marker"));
-        mMap.addMarker(new MarkerOptions().position(to).snippet("from snippet").title("Marker"));
-
-        //InfoWindowAdapter show information
-        mMap.setInfoWindowAdapter(infoWindow);
-
-        fixZoom(points);
-
-        try {
-            // Tranform the string into a json object
-            final JSONObject json = new JSONObject(result);
-
-            JSONArray routeArray = json.getJSONArray("routes");
-
-            JSONObject routes = routeArray.getJSONObject(0);
-            JSONObject overviewPolylines = routes
-                    .getJSONObject("overview_polyline");
-            String encodedString = overviewPolylines.getString("points");
-            List<LatLng> list = decodePoly(encodedString);
-
-            PolylineOptions options = new PolylineOptions().width(5).color(Color.BLUE).geodesic(true);
-
-            for (int z = 0; z < list.size() - 1; z++) {
-                LatLng point = list.get(z);
-
-                options.add(point);
-            }
-            lineDestination = mMap.addPolyline(options);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    private String makeURL(LatLng from, LatLng to) {
-        StringBuilder urlString = new StringBuilder();
-        urlString.append("http://maps.googleapis.com/maps/api/directions/json");
-        urlString.append("?origin="); //from
-        urlString.append(Double.toString(from.latitude) + "," + Double.toString(from.longitude));
-        urlString.append("&destination="); //to
-        urlString.append(Double.toString(to.latitude) + "," + Double.toString(to.longitude));
-        urlString.append("&sensor=false&mode=driving&alternatives=true");
-        return urlString.toString();
-    }
-
-
-    private List<LatLng> decodePoly(String encoded) {
-
-        List<LatLng> poly = new ArrayList<LatLng>();
-        int index = 0, len = encoded.length();
-        int lat = 0, lng = 0;
-
-        while (index < len) {
-            int b, shift = 0, result = 0;
-            do {
-                b = encoded.charAt(index++) - 63;
-                result |= (b & 0x1f) << shift;
-                shift += 5;
-            } while (b >= 0x20);
-            int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
-            lat += dlat;
-
-            shift = 0;
-            result = 0;
-            do {
-                b = encoded.charAt(index++) - 63;
-                result |= (b & 0x1f) << shift;
-                shift += 5;
-            } while (b >= 0x20);
-            int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
-            lng += dlng;
-
-            LatLng p = new LatLng((((double) lat / 1E5)),
-                    (((double) lng / 1E5)));
-            poly.add(p);
-        }
-
-        return poly;
-    }
-
-
-    /**
-     * Created by Zoe on 15-02-25.
-     */
-    private class connectAsyncTask extends AsyncTask<Void, Void, String> {
-
-        String url;
-
-        public connectAsyncTask( String urlPass) {
-
-            Log.i("connectAsyncTask", "creating");
-            url = urlPass;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            // TODO Auto-generated method stub
-            super.onPreExecute();
-
-        }
-
-
-
-        @Override
-        protected String doInBackground(Void... params) {
-            JSONParser jsonParser = new JSONParser();
-            String json = jsonParser.getJSONFromUrl(url);
-            return json;
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            super.onPostExecute(result);
-
-            if (result != null) {
-                Log.i("connectAsyncTask", "drawPath");
-                drawPath(result,fromLatLng, toLatLng);
-            }
-        }
-
-    }
-
-    private class Tp2InfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
-
-
-        @Override
-        public View getInfoWindow (com.google.android.gms.maps.model.Marker marker){
-            return null;
-        }
-
-        @Override
-        public View getInfoContents (com.google.android.gms.maps.model.Marker marker){
-            View v = getLayoutInflater().inflate(R.layout.marker, null);
-
-            TextView info = (TextView) v.findViewById(R.id.info);
-
-            info.setText(marker.getPosition().toString()); //Show maker information
-
-            return v;
-        }
-    }
-
-
-    /**
-     * Add information for a test itinerary
-     * Only used by testing
-     */
-    private void setTestItinerary() {
-        testItinerary = new Itinerary();
-
-        List<Tp2Marker> markers = new ArrayList<>();
-
-        //add some Location objects
-        List<Location> locations = new ArrayList<>();
-        Location l1 = new Location(provider);
-        l1.setLatitude(45.458144);
-        l1.setLongitude(-73.638387);
-        l1.setTime(1424924854700l);
-        locations.add(l1);
-
-        Location l2 = new Location(provider);
-        l2.setLatitude(45.456878);
-        l2.setLongitude(-73.639999);
-        l2.setTime(1424924914700l);
-        locations.add(l2);
-
-        Location l3 = new Location(provider);
-        l3.setLatitude(45.457992);
-        l3.setLongitude(-73.638733);
-        l3.setTime(1424924944700l);
-        locations.add(l3);
-
-        Location l4 = new Location(provider);
-        l4.setLatitude(45.458895);
-        l4.setLongitude(-73.637638);
-        l4.setTime(1424924974700l);
-        locations.add(l4);
-
-        Location l5 = new Location(provider);
-        l5.setLatitude(45.459753);
-        l5.setLongitude(-73.637016);
-        l5.setTime(1424925004700l);
-        locations.add(l5);
-
-        Location l6 = new Location(provider);
-        l6.setLatitude(45.460633);
-        l6.setLongitude(-73.636136);
-        l6.setTime(1424925034700l);
-        locations.add(l6);
-
-        Location l7 = new Location(provider);
-        l7.setLatitude(45.461822);
-        l7.setLongitude(-73.635128);
-        l7.setTime(1424925064700l);
-        locations.add(l7);
-
-        Location l8 = new Location(provider);
-        l8.setLatitude(45.465765);
-        l8.setLongitude(-73.631544);
-        l8.setTime(1424925094700l);
-        locations.add(l8);
-
-        Location l9 = new Location(provider);
-        l9.setLatitude(45.471905);
-        l9.setLongitude(-73.626738);
-        l9.setTime(1424925124700l);
-        locations.add(l9);
-
-        Location l10 = new Location(provider);
-        l10.setLatitude(45.477020);
-        l10.setLongitude(-73.621502);
-        l10.setTime(1424925154700l);
-        locations.add(l10);
-
-        Location l11 = new Location(provider);
-        l11.setLatitude(45.479669);
-        l11.setLongitude(-73.621588);
-        l11.setTime(1424925184700l);
-        locations.add(l1);
-
-        Location l12 = new Location(provider);
-        l12.setLatitude(45.482136);
-        l12.setLongitude(-73.625708);
-        l12.setTime(1424925214700l);
-        locations.add(l12);
-
-        Location l13 = new Location(provider);
-        l13.setLatitude(45.486228);
-        l13.setLongitude(-73.626652);
-        l13.setTime(1424925244700l);
-        locations.add(l13);
-
-        Location l14 = new Location(provider);
-        l14.setLatitude(45.490620);
-        l14.setLongitude(-73.623047);
-        l14.setTime(1424925274700l);
-        locations.add(l14);
-
-        Location l15 = new Location(provider);
-        l15.setLatitude(45.494652);
-        l15.setLongitude(-73.619528);
-        l15.setTime(1424925304700l);
-        locations.add(l15);
-
-        Location l16 = new Location(provider);
-        l16.setLatitude(45.497239);
-        l16.setLongitude(-73.618584);
-        l16.setTime(1424925334700l);
-        locations.add(l16);
-
-        Location l17 = new Location(provider);
-        l17.setLatitude(45.499104);
-        l17.setLongitude(-73.621588);
-        l17.setTime(1424925364700l);
-        locations.add(l17);
-
-        Location l18 = new Location(provider);
-        l18.setLatitude(45.503676);
-        l18.setLongitude(-73.618927);
-        l18.setTime(1424925394700l);
-        locations.add(l18);
-
-
-        Iterator<Location> i = locations.iterator();
-        float lb = 99;
-        Tp2Marker p;
-        ConnectInfo info;
-
-        while (i.hasNext()) {
-
-            Location ltemp = i.next();
-            Log.i("test:", "ltemp " + ltemp.getLatitude() + "," + ltemp.getLongitude());
-            //if (provider == LocationManager.GPS_PROVIDER) {
-                info = new ConnectGPSInfo(context);
-                p = new MarkerGPS(ltemp,context,(ConnectGPSInfo)info);
-            //} else {
-              //  info = new ConnectNetworkInfo(context);
-                //p = new MarkerNetwork(i.next(),context,(ConnectNetworkInfo)info);
-            //}
-
-            p.setLocation(ltemp);
-            p.setNiv_batt(lb);
-            p.setInfo(new ConnectGPSInfo(context).getInfo());
-            p.setMod_loc(provider);
-            lb = lb - 1; // level battery
-            if (p == null) {
-                Log.i("test:", "Marker is null");
-                return;
-            }
-            markers.add(p);
-            //testItinerary.increaseMarkers(p);
-            testItinerary.increaseNbr_sb();
-        }
-        testItinerary.setTp2Markers(markers);
-
-    }
 
     private void showTestItinerary(Itinerary testItinerary) {
 
@@ -876,14 +513,8 @@ public class MapsActivity extends FragmentActivity {
         int n = 0;
         LatLng from, to;
         from = i.next().getLatLng();
-        markerOpt = new MarkerOptions();
-        markerOpt.position(from);
-        Log.i("test:", "marker LatLng " + from.toString());
-        markerOpt.draggable(false);
-        markerOpt.visible(true);
-        markerOpt.icon(BitmapDescriptorFactory.fromResource((R.drawable.marker)));
-        mMap.addMarker(markerOpt);
-        mMap.setInfoWindowAdapter(infoWindow);
+        DrawTp2Marker.setTp2Marker(MapsActivity.this, mMap, from);
+
 
         while (i.hasNext()) {
             Log.i("test:", "has next");
@@ -892,23 +523,21 @@ public class MapsActivity extends FragmentActivity {
 
             to = p.getLatLng();
 
-
-
-            markerOpt.position(to);
-            Log.i("test:", "marker LatLng " + p.getLatLng().toString());
-            markerOpt.draggable(false);
-            markerOpt.visible(true);
-            markerOpt.icon(BitmapDescriptorFactory.fromResource((R.drawable.marker)));
-            mMap.addMarker(markerOpt);
-            mMap.setInfoWindowAdapter(infoWindow);
+            DrawTp2Marker.setTp2Marker(MapsActivity.this, mMap, to);
             Log.i("test:", "set a marker " + n++);
 
+            Tp2PolyLine.drawLineBetweenTwoMarkers(mMap,from, to);
             from = to;
-           // drawLineBetweenTwoMarkers(from, to);
+
             points.add(p.getLatLng());
         }
-        drawLineBetweenTwoMarkers(points.get(0), points.get(points.size()-1));
-        fixZoom(points);
+        //drawLineBetweenTwoMarkers(points.get(0), points.get(points.size()-1));
+
+        //it doesn't work, maybe use Overlayer
+
+        //new DrawPathAsyncTask(mMap,points.get(0),points.get(points.size() - 1),
+         //       makeURL(points.get(0), points.get(points.size() - 1))).execute();
+        AdjustCamera.fixZoom(mMap, points);
 
     }
 }

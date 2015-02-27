@@ -14,27 +14,45 @@ public class Itinerary {
     private List<Tp2Marker> tp2Markers; //???if it is necessary
     private int Nbr_sb; // count of base stations
     private float allPowerConsumption;
-    private long startTime;
+    private long startTime, stopTime;
 
-    public Itinerary() {}
-
-    public Itinerary(long time) {
+    public Itinerary() {
 
         this.tp2Markers = new ArrayList<>();
-        this.Nbr_sb = 0;
         this.Dt = 0;
-        this.startTime = time;
-
     }
-   /* public static Itinerary getInstance(ZoomLevel zoom) {
-        if (instance == null) {
-            instance = new Itinerary(zoom);
-        }
-        return instance;
-    }*/
 
 
-     public void increaseMarkers(Tp2Marker tp2Marker) {
+    public long getStartTime() {
+        this.startTime = this.tp2Markers.get(0).getIm();
+        return this.startTime;
+    }
+
+    public void setStartTime(long time) {
+        this.startTime = time;
+    }
+
+    public void setStopTime(long time) {
+        this.stopTime = time;
+    }
+    public long getStopTime() {
+        this.stopTime = this.tp2Markers.get(tp2Markers.size()-1).getIm();
+        return this.stopTime;
+    }
+
+    public void setNbr_sb(int nbr_sb) {
+       this.Nbr_sb = nbr_sb;
+    }
+    public int getNbr_sb() {
+        return this.Nbr_sb;
+    }
+
+    //base station changed
+    public void increaseNbr_sb() {
+        this.Nbr_sb++;
+    }
+
+    public void increaseMarkers(Tp2Marker tp2Marker) {
 
         this.tp2Markers.add(tp2Marker);
     }
@@ -47,17 +65,7 @@ public class Itinerary {
         return this.tp2Markers;
     }
 
-    public void increaseNbr_sb() {
 
-        this.Nbr_sb++;
-    }
-
-    public int getNbr_sb() {
-        return this.Nbr_sb;
-    }
-    public void setNbr_sb(int nbr_sb) {
-        this.Nbr_sb = nbr_sb;
-    }
 
     public float getAllPowerConsumption() {
 
@@ -76,12 +84,5 @@ public class Itinerary {
         this.Dt = dt;
     }
 
-    public long getStartTime() {
-        return this.startTime;
-    }
-
-    public void setStartTime(long time) {
-        this.startTime = time;
-    }
 
 }

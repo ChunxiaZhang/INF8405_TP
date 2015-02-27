@@ -25,7 +25,8 @@ import java.net.URLEncoder;
 import java.nio.charset.MalformedInputException;
 import java.util.ArrayList;
 
-
+////????????????????????? isn't used
+///////////////////////////////////////
 public class FromToActivity extends ActionBarActivity {
 
     private ImageButton btn_search;

@@ -1,4 +1,4 @@
-package com.polymtl.jiajing.tp2_localisationmap;
+package com.polymtl.jiajing.tp2_localisationmap.service;
 
 import android.util.Log;
 

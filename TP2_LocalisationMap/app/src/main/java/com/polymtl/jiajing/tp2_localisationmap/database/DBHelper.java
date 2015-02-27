@@ -1,4 +1,4 @@
-package com.polymtl.jiajing.tp2_localisationmap;
+package com.polymtl.jiajing.tp2_localisationmap.database;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -56,13 +56,14 @@ public class DBHelper extends SQLiteOpenHelper {
 
     //ITINERARY table column names
     private static final String KEY_DT = "dt"; //la distance total
-    private static final String  KEY_TIME = "time"; // zoom level
+    private static final String  KEY_START_TIME = "start_time"; // start time
+    private static final String KEY_STOP_TIME = "stop_time";
     private static final String  KEY_NBR_SB = "nbr_sb"; //count of base stations
     private static final String  KEY_POWER_CONSUMPTION = "powerConsumption"; // power consumption of itinerary
 
     //Table create statements
     private static final String CREATE_TABLE_ITINERARY = "CREATE TABLE " + TABLE_ITINERARY +
-            " (" + KEY_ID + " INTEGER PRIMARY KEY," + KEY_DT + " FLOAT," + KEY_TIME + " LONG," +
+            " (" + KEY_ID + " INTEGER PRIMARY KEY," + KEY_DT + " FLOAT," + KEY_START_TIME + " LONG," + KEY_STOP_TIME + " LONG," +
             KEY_NBR_SB + " INTEGER, " + KEY_POWER_CONSUMPTION + " FLOAT," + KEY_CREATED_AT + " DATETIME" + ")";
 
 
@@ -101,7 +102,8 @@ public class DBHelper extends SQLiteOpenHelper {
 
         ContentValues values = new ContentValues();
         values.put(KEY_DT, itinerary.getDt());
-        values.put(KEY_TIME, itinerary.getStartTime());
+        values.put(KEY_START_TIME, itinerary.getStartTime());
+        values.put(KEY_STOP_TIME, itinerary.getStopTime());
         values.put(KEY_NBR_SB, itinerary.getNbr_sb());
         values.put(KEY_POWER_CONSUMPTION, itinerary.getAllPowerConsumption());
 
@@ -123,7 +125,8 @@ public class DBHelper extends SQLiteOpenHelper {
             itinerary.setDt(cursor.getLong(cursor.getColumnIndex(KEY_DT)));
             itinerary.setAllPowerConsumption(cursor.getFloat(cursor.getColumnIndex(KEY_POWER_CONSUMPTION)));
             itinerary.setNbr_sb(cursor.getInt(cursor.getColumnIndex(KEY_NBR_SB)));
-            itinerary.setStartTime(cursor.getLong(cursor.getColumnIndex(KEY_TIME)));
+            itinerary.setStartTime(cursor.getLong(cursor.getColumnIndex(KEY_START_TIME)));
+            itinerary.setStopTime(cursor.getLong(cursor.getColumnIndex(KEY_STOP_TIME)));
 
             result.add(itinerary);
         }
