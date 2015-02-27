@@ -22,4 +22,6 @@
     <string name="title_activity_from_to">FromToActivity</string>
 
     <string name="hello_world">Hello world!</string>
+    <string name="ignore">Ignore</string>
+    <string name="settings">Settings</string>
 </resources>

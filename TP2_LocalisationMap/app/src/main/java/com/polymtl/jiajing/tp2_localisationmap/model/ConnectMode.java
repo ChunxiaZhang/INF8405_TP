@@ -12,6 +12,7 @@ public class ConnectMode {
     public ConnectMode() {
 
         provider = LocationManager.GPS_PROVIDER;
+
     }
 
     public void setProvider(String provider) {
@@ -21,4 +22,6 @@ public class ConnectMode {
     public String getProvider() {
         return this.provider;
     }
+
+
 }

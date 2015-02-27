@@ -75,7 +75,7 @@ public class Tp2Marker implements ConnectInfo {
     }
 
     public double getLongitude() {
-        return this.getLongitude();
+        return this.longitude;
     }
     public void setLongitude(double longitude) {
         this.longitude = longitude;
@@ -123,6 +123,14 @@ public class Tp2Marker implements ConnectInfo {
 
 
         return this.address;
+    }
+
+    public LatLng getLatLng() {
+        return new LatLng(this.latitude, this.longitude);
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
     }
 
 

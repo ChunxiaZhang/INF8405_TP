@@ -39,6 +39,10 @@ public class Itinerary {
         this.tp2Markers.add(tp2Marker);
     }
 
+    public void setTp2Markers(List<Tp2Marker> tp2Markers) {
+        this.tp2Markers = tp2Markers;
+    }
+
     public List<Tp2Marker> getTp2Markers() {
         return this.tp2Markers;
     }
