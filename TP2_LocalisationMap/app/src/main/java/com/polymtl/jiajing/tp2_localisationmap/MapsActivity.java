@@ -23,6 +23,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Surface;
 import android.view.View;
 
 import android.widget.EditText;
@@ -68,7 +69,7 @@ public class MapsActivity extends FragmentActivity {
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
-    private ImageButton btn_fromTo, btn_start_stop, btn_power;
+    private ImageButton btn_fromTo, btn_start_stop, btn_state_info, btn_camera, btn_clean;
     private PopupWindow destinationPopup;
     private View destinationView;
     private String addressTo, addressFrom;
@@ -221,7 +222,9 @@ public class MapsActivity extends FragmentActivity {
 
         btn_fromTo = (ImageButton) findViewById(R.id.btn_destination);
         btn_start_stop = (ImageButton) findViewById(R.id.btn_start_stop);
-        btn_power = (ImageButton) findViewById(R.id.btn_power);
+        btn_state_info = (ImageButton) findViewById(R.id.btn_state_info);
+        btn_camera = (ImageButton) findViewById(R.id.btn_camera);
+        btn_clean = (ImageButton) findViewById(R.id.btn_clean);
 
         if(isOpenTracking) {
             btn_start_stop.setBackground(getResources().getDrawable(R.drawable.stop));
@@ -298,26 +301,26 @@ public class MapsActivity extends FragmentActivity {
             }
         });
 
-    }
+        btn_state_info.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
-    private void addTp2Marker() {
+            }
+        });
 
-        Tp2Marker tp2Marker;
+        btn_camera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
-        if (provider.equals(LocationManager.GPS_PROVIDER)) {
+            }
+        });
 
-            ConnectGPSInfo info = new ConnectGPSInfo(context);
-            tp2Marker = new MarkerGPS(location, context, info);
-
-        } else {
-
-            ConnectNetworkInfo info = new ConnectNetworkInfo(context);
-            tp2Marker = new MarkerNetwork(location,context,info);
-
-        }
-
-       // itinerary.increaseMarkers(tp2Marker);
-        //itinerary.increaseNbr_sb();
+        btn_clean.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mMap.clear();
+            }
+        });
 
     }
 
@@ -526,7 +529,7 @@ public class MapsActivity extends FragmentActivity {
             DrawTp2Marker.setTp2Marker(MapsActivity.this, mMap, to);
             Log.i("test:", "set a marker " + n++);
 
-            Tp2PolyLine.drawLineBetweenTwoMarkers(mMap,from, to);
+            Tp2PolyLine.drawLineBetweenTwoMarkers(mMap, from, to);
             from = to;
 
             points.add(p.getLatLng());

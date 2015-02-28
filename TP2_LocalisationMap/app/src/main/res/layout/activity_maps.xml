@@ -35,9 +35,24 @@
         <ImageButton
             android:layout_width="60dp"
             android:layout_height="wrap_content"
-            android:id="@+id/btn_power"
+            android:id="@+id/btn_camera"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
-            android:background="@drawable/power"/>
+            android:background="@drawable/camera"/>
+        <ImageButton
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/btn_state_info"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:background="@drawable/state"/>
+        <ImageButton
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/btn_clean"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:background="@drawable/cleaner"/>
+
         </LinearLayout>
 </RelativeLayout>
