@@ -19,6 +19,8 @@ import java.util.List;
  */
 public class Tp2Marker implements ConnectInfo {
 
+    private int id;
+    private int itineraryId;
     //Coord
     private double latitude;
     private double longitude;
@@ -57,6 +59,20 @@ public class Tp2Marker implements ConnectInfo {
         this.Mod_loc =  location.getProvider();
 
         this.geocoder = new Geocoder(context);
+    }
+
+    public int getId() {
+        return this.id;
+    }
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getItineraryId() {
+        return this.itineraryId;
+    }
+    public void setItineraryId(int id) {
+        this.itineraryId = itineraryId;
     }
 
     public double getAltitude() {

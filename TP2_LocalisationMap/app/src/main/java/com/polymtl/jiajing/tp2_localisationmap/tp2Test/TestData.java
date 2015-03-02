@@ -18,14 +18,30 @@ import java.util.List;
  * Created by Zoe on 15-02-27.
  */
 public class TestData {
+
+    private Itinerary itinerary;
+    private List<Tp2Marker> markers;
+
+    public List<Tp2Marker> getTestMarkers() {
+
+       return this.markers;
+    }
+
+    public Itinerary getTestItinerary() {
+        return this.itinerary;
+    }
+
     /**
      * Add information for a test itinerary
      * Only used by testing
      */
-    public static Itinerary setTestItinerary(Context context, String provider) {
+
+    public void setTestItinerary(Context context, String provider) {
        Itinerary testItinerary = new Itinerary();
 
         List<Tp2Marker> markers = new ArrayList<>();
+
+        testItinerary.setStartTime(1424924854700l);
 
         //add some Location objects
         List<Location> locations = new ArrayList<>();
@@ -34,6 +50,9 @@ public class TestData {
         l1.setLongitude(-73.638387);
         l1.setTime(1424924854700l);
         locations.add(l1);
+
+        testItinerary.setStartTime(1424924854700l);
+        testItinerary.setStopPower(60);
 
         Location l2 = new Location(provider);
         l2.setLatitude(45.456878);
@@ -137,6 +156,9 @@ public class TestData {
         l18.setTime(1424925394700l);
         locations.add(l18);
 
+        testItinerary.setStopTime(1424925394700l);
+        testItinerary.setStopPower(50);
+
 
         Iterator<Location> i = locations.iterator();
         float lb = 99;
@@ -160,16 +182,23 @@ public class TestData {
             p.setInfo(new ConnectGPSInfo(context).getInfo());
             p.setMod_loc(provider);
             lb = lb - 1; // level battery
-            if (p == null) {
-                Log.i("test:", "Marker is null");
-                return null;
-            }
+
             markers.add(p);
 
         }
-        testItinerary.setTp2Markers(markers);
+        //testItinerary.setTp2Markers(markers);
 
-        return testItinerary;
+        this.markers = markers;
+
+        testItinerary.setDt(l18.distanceTo(l1));
+
+        testItinerary.setNbr_sb(20);
+
+        //testItinerary.setAllPowerConsumption();
+
+        this.itinerary = testItinerary;
+
+        Log.i("testData:", "Nbr_sb  " + this.itinerary.getNbr_sb());
     }
 
 

@@ -38,6 +38,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Polyline;
+import com.polymtl.jiajing.tp2_localisationmap.database.DBHelper;
 import com.polymtl.jiajing.tp2_localisationmap.model.ConnectGPSInfo;
 import com.polymtl.jiajing.tp2_localisationmap.model.ConnectMode;
 import com.polymtl.jiajing.tp2_localisationmap.model.ConnectNetworkInfo;
@@ -92,9 +93,17 @@ public class MapsActivity extends FragmentActivity {
     private Itinerary thisItinerary;
     private Itinerary testItinerary; //used for testing
 
+    long itinerary_id;
+
+    private List<Tp2Marker> markers;
+
+    private List<Tp2Marker> testMarkers;
+
     private boolean isOpenTracking = false;
 
     private boolean isConnected; //
+
+    private DBHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,6 +122,8 @@ public class MapsActivity extends FragmentActivity {
 
         locationManager =  (LocationManager) context.getSystemService(LOCATION_SERVICE);
 
+        markers = new ArrayList<>();
+
         setUpMapIfNeeded();
 
         setUpButtons();
@@ -126,6 +137,10 @@ public class MapsActivity extends FragmentActivity {
         Log.i("Location: ", "longitude: " + location.getLongitude() + "  latitude:" + location.getLatitude());
         Log.i("Time: " , " " + location.getTime());
         Log.i("Mode connect: " , " " + connectMode.getProvider());*/
+
+        dbHelper = new DBHelper(getApplicationContext());
+
+
 
     }
 
@@ -256,11 +271,25 @@ public class MapsActivity extends FragmentActivity {
                     //Show battery level
                     Toast.makeText(MapsActivity.this, "Battery level: " + power.getPowerLever(), Toast.LENGTH_LONG);
 
+                    //set thisItinerary
+                    thisItinerary.setStartTime(markers.get(0).getIm());
+                    thisItinerary.setStartPower(markers.get(0).getNiv_batt());
+
+                    thisItinerary.setStopTime(markers.get(markers.size()-1).getIm());
+                    thisItinerary.setStopPower(markers.get(markers.size()-1).getNiv_batt());
+
+                    thisItinerary.setDt(markers.get(markers.size()-1).getLocation().distanceTo(markers.get(0).getLocation()));
+
+                    //save thisItinerary and markers in DB
+                   /* itinerary_id = dbHelper.createItinerary(thisItinerary);
+                    for (int i = 0; i < markers.size(); i++) {
+                        dbHelper.createMarker(markers.get(i), itinerary_id);
+                    }*/
+
                     //Show all markers in the map and information about this itinerary
                     /////
-                    //The test itinerary
-                    testItinerary = TestData.setTestItinerary(MapsActivity.this, provider);
-                    showTestItinerary(testItinerary);
+
+
                 }
                 else { //start tracking
                     //Show battery level
@@ -269,7 +298,7 @@ public class MapsActivity extends FragmentActivity {
                     thisItinerary = new Itinerary();//initial this itinerary
 
                     //add the first marker
-                    thisItinerary.increaseMarkers(new Tp2Marker(location, context));
+                    markers.add(new Tp2Marker(location, context));
 
                     //request listening location changed
                     //minDistance is 10 metres
@@ -335,10 +364,8 @@ public class MapsActivity extends FragmentActivity {
             updateToNewLocation(location);
 
             //add Tp2Marker
-            thisItinerary.increaseMarkers(new Tp2Marker(location, context));
+            markers.add(new Tp2Marker(location, context));
 
-            //Need to add marker to database ?????
-            ///
         }
 
         //Called when the provider status changes.
@@ -506,13 +533,65 @@ public class MapsActivity extends FragmentActivity {
 
     }
 
+    private void prepareTestData() {
+        //The test itinerary
+        //Create itinerary
+        TestData testData = new TestData();
+        testData.setTestItinerary(getApplicationContext(), provider);
+        testItinerary = testData.getTestItinerary();
+        //Log.i("test get itinerary:", " Nbr_sb: "+testItinerary.getNbr_sb());
+        testMarkers = testData.getTestMarkers();
 
-    private void showTestItinerary(Itinerary testItinerary) {
+        //Insert testItinerary in db
+        long testitinerary_id = dbHelper.createItinerary(testItinerary);
+        //Insert markers in db
+        for (int i = 0; i < testMarkers.size(); i++) {
+            dbHelper.createMarker(testMarkers.get(i), testitinerary_id);
+        }
 
-        List<Tp2Marker> ps = testItinerary.getTp2Markers();
-        Log.i("test:", "Tp2Marker are " + ps.size());
+        Itinerary test = dbHelper.getItinerary(1424924854700l);
+
+        if (test == null) {
+            Log.i("test get itinerary", " " + "test is null");
+        }
+
+        Log.i("test get itinerary", " getDt " + test.getDt());
+        Log.i("test get itinerary", "getStartTime " + test.getStartTime());
+        Log.i("test get itinerary", " getNbr_sb " + test.getNbr_sb()); //????why it changed to 0
+
+
+        showTestItinerary();
+    }
+
+
+    private void showTestItinerary() {
+
+        TestData testData = new TestData();
+        testData.setTestItinerary(getApplicationContext(), provider);
+        testItinerary = testData.getTestItinerary();
+        //Log.i("test get itinerary:", " Nbr_sb: "+testItinerary.getNbr_sb());
+        testMarkers = testData.getTestMarkers();
+
+        //Insert testItinerary in db
+        long testItinerary_id = dbHelper.createItinerary(testItinerary);
+        //Insert markers in db
+        for (int i = 0; i < testMarkers.size(); i++) {
+            dbHelper.createMarker(testMarkers.get(i), testItinerary_id);
+        }
+
+        Itinerary test = dbHelper.getItinerary(1424924854700l);
+
+        if (test == null) {
+            Log.i("test get itinerary", " " + "test is null");
+        }
+
+        Log.i("test get itinerary", " getDt " + test.getDt());
+        Log.i("test get itinerary", "getStartTime " + test.getStartTime());
+        Log.i("test get itinerary", " getNbr_sb " + test.getNbr_sb()); //????why it changed to 0
+
+        ///////draw
         List<LatLng> points = new ArrayList<>();
-        Iterator<Tp2Marker> i = ps.iterator();
+        Iterator<Tp2Marker> i = testMarkers.iterator();
         int n = 0;
         LatLng from, to;
         from = i.next().getLatLng();
@@ -534,12 +613,7 @@ public class MapsActivity extends FragmentActivity {
 
             points.add(p.getLatLng());
         }
-        //drawLineBetweenTwoMarkers(points.get(0), points.get(points.size()-1));
 
-        //it doesn't work, maybe use Overlayer
-
-        //new DrawPathAsyncTask(mMap,points.get(0),points.get(points.size() - 1),
-         //       makeURL(points.get(0), points.get(points.size() - 1))).execute();
         AdjustCamera.fixZoom(mMap, points);
 
     }
