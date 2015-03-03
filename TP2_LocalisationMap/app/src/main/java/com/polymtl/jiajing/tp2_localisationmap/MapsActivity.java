@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 
+import android.graphics.drawable.BitmapDrawable;
 import android.location.LocationProvider;
 
 import android.location.Address;
@@ -17,6 +18,11 @@ import android.location.LocationManager;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
+import android.telephony.CellLocation;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
+import android.telephony.cdma.CdmaCellLocation;
+import android.telephony.gsm.GsmCellLocation;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -33,10 +39,15 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderApi;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.polymtl.jiajing.tp2_localisationmap.database.DBHelper;
 import com.polymtl.jiajing.tp2_localisationmap.model.ConnectGPSInfo;
@@ -61,6 +72,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static android.telephony.PhoneStateListener.LISTEN_CELL_LOCATION;
 import static com.polymtl.jiajing.tp2_localisationmap.service.Tp2PolyLine.*;
 
 
@@ -75,6 +87,13 @@ public class MapsActivity extends FragmentActivity {
     private View destinationView;
     private String addressTo, addressFrom;
     private LatLng fromLatLng, toLatLng;
+
+   // private FusedLocationProviderApi fusedLocationProviderApi = LocationServices.FusedLocationApi;//test
+    //private GoogleApiClient googleApiClient;
+
+
+    TelephonyManager telephonyManager;
+    PhoneStateListener phoneStateListener;
 
     private LocationManager locationManager;
     private Location location;
@@ -122,6 +141,13 @@ public class MapsActivity extends FragmentActivity {
 
         locationManager =  (LocationManager) context.getSystemService(LOCATION_SERVICE);
 
+        //test
+       /* googleApiClient = new GoogleApiClient.Builder(MapsActivity.this)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();*/
+
         markers = new ArrayList<>();
 
         setUpMapIfNeeded();
@@ -130,9 +156,9 @@ public class MapsActivity extends FragmentActivity {
 
         setUpPopupDestination();
 
-        /* TelephonyManager telephonyManager = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
+         telephonyManager = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
 
-       Log.i("Mode initial:" , telephonyManager.getNetworkOperatorName() + " Phone Type:" + telephonyManager.getPhoneType());
+       /*Log.i("Mode initial:" , telephonyManager.getNetworkOperatorName() + " Phone Type:" + telephonyManager.getPhoneType());
         Log.i("Power level: " , " " + power.getPowerLever() );
         Log.i("Location: ", "longitude: " + location.getLongitude() + "  latitude:" + location.getLatitude());
         Log.i("Time: " , " " + location.getTime());
@@ -191,15 +217,15 @@ public class MapsActivity extends FragmentActivity {
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
-
+        mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
         // Move the camera instantly to Montreal.
         Log.i("setUpMap: " , "Move the camera instantly to Montreal.");
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(45.508536, -73.597929), 15));
 
-        if (!DetectConnectivity.isConnected(context)) {
+        /*if (!DetectConnectivity.isConnected(context)) {
             Log.i("setUpMap:", "can not connect ");
             return;
-        }
+        }*/
         if (provider == null) {
             Log.i("setUpMap:" , "provider is null");
             return;
@@ -220,6 +246,16 @@ public class MapsActivity extends FragmentActivity {
         DrawTp2Marker.setTp2Marker(MapsActivity.this, mMap, latLng);
         AdjustCamera.moveCamera(mMap,latLng, zoomLevel.getZoomLevel());
 
+        mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
+            @Override
+            public boolean onMyLocationButtonClick() {
+                Log.i("onMyLocationButtonClick", "click");
+                DrawTp2Marker.setTp2Marker(MapsActivity.this, mMap,
+                        new LatLng(location.getLatitude(),location.getLongitude()));
+
+                return false;
+            }
+        });
     }
 
 
@@ -265,6 +301,8 @@ public class MapsActivity extends FragmentActivity {
 
                 if(isOpenTracking) { //stop tracking
                     locationManager.removeUpdates(tp2Locationlistener);
+                    telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
+
                     btn_start_stop.setBackground(getResources().getDrawable(R.drawable.start));
                     isOpenTracking = false;
 
@@ -305,6 +343,11 @@ public class MapsActivity extends FragmentActivity {
                     locationManager.requestLocationUpdates(provider, frequency.getFrequency(), 10, tp2Locationlistener);
                     btn_start_stop.setBackground(getResources().getDrawable(R.drawable.stop));
                     isOpenTracking = true;
+
+                    //start listening cell location changed
+                    setUpPhoneStateListener();
+
+
                 }
             }
         });
@@ -353,6 +396,23 @@ public class MapsActivity extends FragmentActivity {
 
     }
 
+    /////////test
+   /* @Override
+    public void onConnected(Bundle bundle) {
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+
+    }*/
+    //////////////////
+
     private final class Tp2LocationListener implements LocationListener {
 
 
@@ -371,6 +431,7 @@ public class MapsActivity extends FragmentActivity {
         //Called when the provider status changes.
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
+            Log.i("onStatusChanged:", "onStatusChanged");
             switch (status) {
                 case LocationProvider.AVAILABLE:
                 case LocationProvider.TEMPORARILY_UNAVAILABLE:
@@ -398,14 +459,89 @@ public class MapsActivity extends FragmentActivity {
     }
 
 
-    //Need add base station changed listener
-    //
-    //
+    //set up base station changed listener
+    public void setUpPhoneStateListener() {
+        //if (telephonyManager != null && !telephonyManager.getNetworkOperator().equals(""))
+        phoneStateListener = new PhoneStateListener() {
+            //Cell location changed listener
+            @Override
+            public void onCellLocationChanged(CellLocation cellLocation) {
+                String LOG_TAG = "PhoneStateListener";
+
+                //number station increase
+                thisItinerary.increaseNbr_sb();
+
+                if (cellLocation instanceof GsmCellLocation) {
+                    GsmCellLocation gcLoc = (GsmCellLocation) cellLocation;
+                    Log.i(LOG_TAG,
+                            "onCellLocationChanged: GsmCellLocation "
+                                    + gcLoc.toString());
+                    Log.i(LOG_TAG, "onCellLocationChanged: GsmCellLocation getCid "
+                            + gcLoc.getCid());
+                    Log.i(LOG_TAG, "onCellLocationChanged: GsmCellLocation getLac "
+                            + gcLoc.getLac());
+                    Log.i(LOG_TAG, "onCellLocationChanged: GsmCellLocation getPsc"
+                            + gcLoc.getPsc()); // Requires min API 9
+
+                    //for test
+                    Toast.makeText(MapsActivity.this,"Gsm: Cid" + gcLoc.getCid() +
+                            "Lac:" + gcLoc.getLac() + "Psc:" + gcLoc.getPsc(), Toast.LENGTH_LONG);
+                } else if (cellLocation instanceof CdmaCellLocation) {
+
+                    CdmaCellLocation ccLoc = (CdmaCellLocation) cellLocation;
+                    Log.i(LOG_TAG,
+                            "onCellLocationChanged: CdmaCellLocation "
+                                    + ccLoc.toString());
+                    Log.i(LOG_TAG,
+                            "onCellLocationChanged: CdmaCellLocation getBaseStationId "
+                                    + ccLoc.getBaseStationId());
+                    Log.i(LOG_TAG,
+                            "onCellLocationChanged: CdmaCellLocation getBaseStationLatitude "
+                                    + ccLoc.getBaseStationLatitude());
+                    Log.i(LOG_TAG,
+                            "onCellLocationChanged: CdmaCellLocation getBaseStationLongitude"
+                                    + ccLoc.getBaseStationLongitude());
+                    Log.i(LOG_TAG,
+                            "onCellLocationChanged: CdmaCellLocation getNetworkId "
+                                    + ccLoc.getNetworkId());
+                    Log.i(LOG_TAG,
+                            "onCellLocationChanged: CdmaCellLocation getSystemId "
+                                    + ccLoc.getSystemId());
+                    //for test
+                    Toast.makeText(MapsActivity.this,"ccLoc: CdmaCellLocation" + ccLoc.toString() +
+                            "Latitude:" + ccLoc.getBaseStationLatitude() +
+                            "Longitude:" + ccLoc.getBaseStationLongitude(), Toast.LENGTH_LONG);
+                } else {
+                    Log.i(LOG_TAG, "onCellLocationChanged: " + location.toString());
+                }
+
+
+            }
+        };
+
+        telephonyManager.listen(phoneStateListener, LISTEN_CELL_LOCATION);
+    }
+
+
+
+
+
+    @Override
+    public void onBackPressed() {
+        Log.i("onBackPressed", "start");
+        if (destinationPopup != null && destinationPopup.isShowing()) {
+            Log.i("onBackPressed", "dismiss");
+            destinationPopup.dismiss();
+        } else {
+            super.onBackPressed();
+        }
+
+    }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            new AlertDialog.Builder(this).setMessage("Do you want to exit?")
+            new AlertDialog.Builder(this).setMessage("Do you want to close the map?")
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .setTitle("Exit Confirm")
                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
@@ -452,6 +588,9 @@ public class MapsActivity extends FragmentActivity {
         destinationView = inflater.inflate(R.layout.popup_destination, null);
         destinationPopup = new PopupWindow(destinationView,
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        destinationPopup.setBackgroundDrawable(new BitmapDrawable());
+        destinationPopup.setOutsideTouchable(true);
+
         final EditText to = (EditText) destinationView.findViewById(R.id.to);
         final EditText from = (EditText) destinationView.findViewById(R.id.from);
         final ImageButton btn_search = (ImageButton) destinationView.findViewById(R.id.btn_searchDestination);
@@ -532,6 +671,7 @@ public class MapsActivity extends FragmentActivity {
         });
 
     }
+
 
     private void prepareTestData() {
         //The test itinerary
