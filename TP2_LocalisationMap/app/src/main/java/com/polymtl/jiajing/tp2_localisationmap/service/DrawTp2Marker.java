@@ -1,7 +1,6 @@
 package com.polymtl.jiajing.tp2_localisationmap.service;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -51,7 +50,7 @@ public class DrawTp2Marker {
         markerOptions.draggable(false);
         markerOptions.visible(true);
         markerOptions.title(markerOptions.getPosition().toString());
-        markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.markerStation));
+        markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.markerstation));
         map.addMarker(markerOptions);
 
     }

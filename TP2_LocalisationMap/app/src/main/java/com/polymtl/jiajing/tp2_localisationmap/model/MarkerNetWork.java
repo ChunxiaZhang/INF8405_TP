@@ -5,27 +5,21 @@ import android.location.Location;
 import android.net.NetworkInfo;
 
 /**
- * Created by Zoe on 15-02-23.
+ * Created by Jiajing on 2015/3/5.
  */
-public class MarkerNetwork extends Tp2Marker {
-
+public class MarkerNetwork extends Tp2Marker{
     private ConnectNetworkInfo connectInfo;
     private String info;
-
     private NetworkInfo networkInfo;
 
-    public MarkerNetwork(Location location, Context context, ConnectNetworkInfo connectInfo) {
-
-        super(location, context);
+    public MarkerNetwork(Location location, Context context, ConnectNetworkInfo connectInfo){
+        super(location,context);
         this.connectInfo = connectInfo;
     }
-
-    public ConnectNetworkInfo getConnectInfo() {
+    public ConnectNetworkInfo getConnectInfo(){
         return this.connectInfo;
     }
-
-    public String getInfo() {
+    public String getInfo(){
         return connectInfo.getInfo();
     }
-
 }
