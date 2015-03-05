@@ -50,7 +50,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.polymtl.jiajing.tp2_localisationmap.database.DBHelper;
+import com.polymtl.jiajing.tp2_localisationmap.model.BaseStation;
+import com.polymtl.jiajing.tp2_localisationmap.model.BetweenMarkers;
 import com.polymtl.jiajing.tp2_localisationmap.model.ConnectGPSInfo;
+import com.polymtl.jiajing.tp2_localisationmap.model.ConnectInfo;
 import com.polymtl.jiajing.tp2_localisationmap.model.ConnectMode;
 import com.polymtl.jiajing.tp2_localisationmap.model.ConnectNetworkInfo;
 import com.polymtl.jiajing.tp2_localisationmap.model.Frequency;
@@ -99,6 +102,9 @@ public class MapsActivity extends FragmentActivity {
     private Location location;
     private String provider; //
 
+    //private ConnectGPSInfo connectGPSInfo;
+    private ConnectInfo connectInfo;
+
     //private ConnectMode connectMode;
     private Power power;
     private ZoomLevel zoomLevel = new ZoomLevel();
@@ -110,13 +116,17 @@ public class MapsActivity extends FragmentActivity {
 
 
     private Itinerary thisItinerary;
+    long itinerary_id;
+
     private Itinerary testItinerary; //used for testing
 
-    long itinerary_id;
 
     private List<Tp2Marker> markers;
 
+
     private List<Tp2Marker> testMarkers;
+
+    private List<BaseStation> stations;
 
     private boolean isOpenTracking = false;
 
@@ -148,7 +158,8 @@ public class MapsActivity extends FragmentActivity {
                 .addOnConnectionFailedListener(this)
                 .build();*/
 
-        markers = new ArrayList<>();
+
+
 
         setUpMapIfNeeded();
 
@@ -289,6 +300,7 @@ public class MapsActivity extends FragmentActivity {
             public void onClick(View v) {
 
 
+                /* Don't need connected, trace can be done by GPS or network
                 if (!DetectConnectivity.isConnected(MapsActivity.this)) {
                     new AlertDialog.Builder(MapsActivity.this)
                             .setMessage("Maps is offline. Check your network connection.")
@@ -297,7 +309,7 @@ public class MapsActivity extends FragmentActivity {
                             .setNegativeButton(android.R.string.ok, null).show();
                     Log.i("setUpButton:", "not connect");
                     return;
-                }
+                }*/
 
                 if(isOpenTracking) { //stop tracking
                     locationManager.removeUpdates(tp2Locationlistener);
@@ -318,11 +330,16 @@ public class MapsActivity extends FragmentActivity {
 
                     thisItinerary.setDt(markers.get(markers.size()-1).getLocation().distanceTo(markers.get(0).getLocation()));
 
-                    //save thisItinerary and markers in DB
-                   /* itinerary_id = dbHelper.createItinerary(thisItinerary);
-                    for (int i = 0; i < markers.size(); i++) {
-                        dbHelper.createMarker(markers.get(i), itinerary_id);
-                    }*/
+                    //save thisItinerary, stations and markers in DB
+                    itinerary_id = dbHelper.createItinerary(thisItinerary);
+
+                    for (Tp2Marker marker: markers) {
+                        dbHelper.createMarker(marker, itinerary_id);
+                    }
+
+                    for (BaseStation station: stations) {
+                        dbHelper.createStation(station, itinerary_id);
+                    }
 
                     //Show all markers in the map and information about this itinerary
                     /////
@@ -332,6 +349,9 @@ public class MapsActivity extends FragmentActivity {
                 else { //start tracking
                     //Show battery level
                     Toast.makeText(context, "Battery level: " + power.getPowerLever(), Toast.LENGTH_LONG);
+
+                    markers = new ArrayList<>();
+                    stations = new ArrayList<>();
 
                     thisItinerary = new Itinerary();//initial this itinerary
 
@@ -423,8 +443,20 @@ public class MapsActivity extends FragmentActivity {
             Log.i("LocationListener: ", "Location changed");
             updateToNewLocation(location);
 
+            Tp2Marker currentMarker = new Tp2Marker(location, MapsActivity.this);
+            if (markers.size() > 0) {
+                BetweenMarkers betweenMarkers = new BetweenMarkers(markers.get(markers.size()-1), currentMarker);
+                currentMarker.setDir_dep(betweenMarkers.getStringDir_dep());
+                currentMarker.setDrp(betweenMarkers.getDrp());
+                currentMarker.setVm(betweenMarkers.getVm());
+                //Dt is distance from the first marker to current marker
+                currentMarker.setDt(new BetweenMarkers(markers.get(0), currentMarker).getDrp());
+            }
+            //draw current marker
+            DrawTp2Marker.setTp2Marker(MapsActivity.this, mMap, currentMarker);
+
             //add Tp2Marker
-            markers.add(new Tp2Marker(location, context));
+            markers.add(currentMarker);
 
         }
 
@@ -471,7 +503,29 @@ public class MapsActivity extends FragmentActivity {
                 //number station increase
                 thisItinerary.increaseNbr_sb();
 
-                if (cellLocation instanceof GsmCellLocation) {
+                connectInfo = new ConnectNetworkInfo(MapsActivity.this);
+
+
+
+                if (cellLocation instanceof CdmaCellLocation) {
+
+                    BaseStation station = new BaseStation();
+                    CdmaCellLocation ccLoc = (CdmaCellLocation) cellLocation;
+
+                    station.setLatitude(ccLoc.getBaseStationLatitude());
+                    station.setLongitude(ccLoc.getBaseStationLongitude());
+
+                    //Draw station marker
+                    DrawTp2Marker.setStationMarker(MapsActivity.this, mMap, station);
+
+                    //add station to list
+                    stations.add(station);
+
+                }
+
+
+
+                /*if (cellLocation instanceof GsmCellLocation) {
                     GsmCellLocation gcLoc = (GsmCellLocation) cellLocation;
                     Log.i(LOG_TAG,
                             "onCellLocationChanged: GsmCellLocation "
@@ -513,7 +567,7 @@ public class MapsActivity extends FragmentActivity {
                             "Longitude:" + ccLoc.getBaseStationLongitude(), Toast.LENGTH_LONG);
                 } else {
                     Log.i(LOG_TAG, "onCellLocationChanged: " + location.toString());
-                }
+                }*/
 
 
             }
@@ -672,6 +726,9 @@ public class MapsActivity extends FragmentActivity {
 
     }
 
+    private void showItinerary(long itinerary_id) {
+
+    }
 
     private void prepareTestData() {
         //The test itinerary
@@ -702,6 +759,8 @@ public class MapsActivity extends FragmentActivity {
 
         showTestItinerary();
     }
+
+
 
 
     private void showTestItinerary() {

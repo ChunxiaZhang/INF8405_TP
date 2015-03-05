@@ -14,9 +14,7 @@ public class BetweenMarkers {
     private float powerLevelA, powerLevelB;
     private float powerConsumption;
 
-    private enum Direction{
-        EAST,SOUTH,WEST,NORTH,SOUTH_EAST,SOUTH_WEST,NORTH_EAST,NORTH_WEST;
-    }
+
     private float Drp; //la distance relative parcourue
     private float Vm; //la vitesse moyeene
 
@@ -118,6 +116,35 @@ public class BetweenMarkers {
         }
 
         return direction;
+    }
+
+
+    public String getStringDir_dep() {
+        String result = "";
+        switch (getDir_dep()) {
+            case NORTH:
+                result = "North";
+                break;
+            case NORTH_EAST:
+                result = "North east";
+                break;
+            case NORTH_WEST:
+                result = "North west";
+                break;
+            case SOUTH:
+                result = "South";
+                break;
+            case SOUTH_EAST:
+                result = "South east";
+                break;
+            case SOUTH_WEST:
+                result = "South west";
+                break;
+            default:
+                break;
+
+        }
+        return result;
     }
 
     ////????????????this method put here well or not??????

@@ -28,6 +28,12 @@ public class Tp2Marker implements ConnectInfo {
 
     private long Im; // the UTC time of this fix, in milliseconds since January 1, 1970.
 
+    private String Dir_dep; //direction
+
+    private float Drp; //la distance relative parcourue
+    private float Vm; //la vitesse moyeene
+    private float Dt; //la distance totale parcourue depuis le debut du trajet
+
     private String Mod_loc; //le mode de localisation: gps or network
 
     private Power power;
@@ -102,6 +108,34 @@ public class Tp2Marker implements ConnectInfo {
     }
     public void setIm(long im) {
         this.Im = im;
+    }
+
+    public void setDir_dep(String direction) {
+        this.Dir_dep = direction;
+    }
+    public String getDir_dep() {
+        return this.Dir_dep;
+    }
+
+    public void setDrp(float drp) {
+        this.Drp = drp;
+    }
+    public float getDrp() {
+        return this.Drp;
+    }
+
+    public void setVm(float vm) {
+        this.Vm = vm;
+    }
+    public float getVm() {
+        return this.Vm;
+    }
+
+    public void setDt(float dt) {
+        this.Dt = dt;
+    }
+    public float getDt() {
+        return this.Dt;
     }
 
     public String getMod_loc() {

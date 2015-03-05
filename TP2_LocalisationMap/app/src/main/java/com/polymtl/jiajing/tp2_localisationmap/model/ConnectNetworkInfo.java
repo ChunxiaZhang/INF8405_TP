@@ -24,8 +24,8 @@ public class ConnectNetworkInfo implements ConnectInfo {
     private TelephonyManager telephonyManager;
     private CdmaCellLocation cdmaCellLocation;
     private GsmCellLocation gsmCellLocation;
-    private int networkType;
-    private int phoneType;
+    private String networkType;
+    private String phoneType;
     private String MCC; //Mobile country code
     private String MNC; //Mobile Network cod
     private String operatorName;
@@ -43,13 +43,36 @@ public class ConnectNetworkInfo implements ConnectInfo {
         gsmCellLocation = (GsmCellLocation) telephonyManager.getCellLocation();
     }
 
-    public int getNetworkType() {
-        this.networkType = telephonyManager.getNetworkType(); //NETWORK_TYPE_CDMA, NETWORK_TYPE_UMTS
+    /*public String getNetworkType() {
+        switch (telephonyManager.getNetworkType()) {
+            case TelephonyManager.NETWORK_TYPE_CDMA:
+                this.networkType = "CDMA";
+                break;
+            case TelephonyManager.NETWORK_TYPE_GPRS:
+                this.networkType = "GPRS";
+                break;
+            case TelephonyManager.NETWORK_TYPE_UMTS:
+                this.networkType = "UMTS";
+                break;
+            default:
+                break;
+        } //NETWORK_TYPE_CDMA, NETWORK_TYPE_UMTS
         return this.networkType;
-    }
+    }*/
+
 
     public int getPhoneType() {
-        this.phoneType = telephonyManager.getPhoneType(); //PHONE_TYPE_CDMA, PHONE_TYPE_GSM
+        //PHONE_TYPE_CDMA, PHONE_TYPE_GSM
+        switch (telephonyManager.getPhoneType()) {
+            case TelephonyManager.PHONE_TYPE_GSM:
+                this.phoneType = "GSM";
+                break;
+            case TelephonyManager.PHONE_TYPE_CDMA:
+                this.phoneType = "CDMA";
+                break;
+            default:
+                break;
+        }
         return this.getPhoneType();
     }
 
@@ -158,6 +181,12 @@ public class ConnectNetworkInfo implements ConnectInfo {
     //What's the format  ????????????????
     @Override
     public String getInfo() {
-        return null;
+        String info = "";
+        info += "Type_R:" + getPhoneType();
+        info += " MCC:" + getMCC() + " MNC:" + getMNC() + " Cell_ID:" + getCell_ID();
+        info += "\nLAC:" + getLAC() + " Niv_sig_sb" + getNiv_sig_sb() + "Lat/lng(" +
+                getLat_sb() + "," + getLong_sb() + ")";
+
+        return info;
     }
 }
