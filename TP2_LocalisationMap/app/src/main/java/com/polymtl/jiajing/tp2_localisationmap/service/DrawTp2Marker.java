@@ -1,7 +1,7 @@
 package com.polymtl.jiajing.tp2_localisationmap.service;
 
 import android.content.Context;
-
+import android.util.Log;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -25,8 +25,9 @@ public class DrawTp2Marker {
         markerOpt.visible(true);
         markerOpt.anchor(0.5f, 0.5f);//set to be center of the picture
         markerOpt.icon(BitmapDescriptorFactory.fromResource((R.drawable.marker)));
+        markerOpt.title(latLng.toString());
         mMap.addMarker(markerOpt);
-        mMap.setInfoWindowAdapter(new Tp2InfoWindowAdapter(context));
+       // mMap.setInfoWindowAdapter(new Tp2InfoWindowAdapter(context));
 
     }
 

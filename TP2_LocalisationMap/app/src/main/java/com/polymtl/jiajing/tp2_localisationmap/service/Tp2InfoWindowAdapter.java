@@ -2,6 +2,7 @@ package com.polymtl.jiajing.tp2_localisationmap.service;
 
 import android.content.Context;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -48,11 +49,13 @@ public class Tp2InfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
         imageView.setImageResource(R.drawable.picture);
 
         TextView title = (TextView) v.findViewById(R.id.title);
+
         title.setText(timeFromUTCSecs(context, tp2Marker.getIm()));//set tile with time
 
         TextView info = (TextView) v.findViewById(R.id.info);
 
-        info.setText(marker.getPosition().toString()); //Show maker information
+        info.setText(getInfo()); //Show maker information
+        //info.setText(marker.getPosition().toString()); //Show maker information
 
         return v;
     }

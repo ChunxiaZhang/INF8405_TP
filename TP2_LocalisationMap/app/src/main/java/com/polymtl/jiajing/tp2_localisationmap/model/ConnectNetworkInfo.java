@@ -6,6 +6,7 @@ import android.telephony.CellInfoCdma;
 import android.telephony.CellInfoGsm;
 import android.telephony.CellInfoLte;
 import android.telephony.CellInfoWcdma;
+import android.telephony.CellLocation;
 import android.telephony.CellSignalStrengthCdma;
 import android.telephony.CellSignalStrengthGsm;
 import android.telephony.CellSignalStrengthLte;
@@ -13,6 +14,9 @@ import android.telephony.CellSignalStrengthWcdma;
 import android.telephony.TelephonyManager;
 import android.telephony.cdma.CdmaCellLocation;
 import android.telephony.gsm.GsmCellLocation;
+import android.util.Log;
+
+import com.google.android.gms.maps.model.LatLng;
 
 
 /**
@@ -22,6 +26,7 @@ public class ConnectNetworkInfo implements ConnectInfo {
 
     private Context context;
     private TelephonyManager telephonyManager;
+    private CellLocation cellLocation;
     private CdmaCellLocation cdmaCellLocation;
     private GsmCellLocation gsmCellLocation;
     private String networkType;
@@ -39,8 +44,18 @@ public class ConnectNetworkInfo implements ConnectInfo {
     public ConnectNetworkInfo(Context context) {
         this.context = context;
         telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-        cdmaCellLocation = (CdmaCellLocation) telephonyManager.getCellLocation();
-        gsmCellLocation = (GsmCellLocation) telephonyManager.getCellLocation();
+
+        cellLocation = telephonyManager.getCellLocation();
+
+        if (cellLocation instanceof GsmCellLocation) {
+            gsmCellLocation = (GsmCellLocation) cellLocation;
+
+        } else if (cellLocation instanceof CdmaCellLocation) {
+
+            cdmaCellLocation = (CdmaCellLocation) cellLocation;
+        }
+
+
     }
 
     /*public String getNetworkType() {
@@ -177,6 +192,7 @@ public class ConnectNetworkInfo implements ConnectInfo {
         //else ???????
         return this.LAC;
     }
+
 
     //What's the format  ????????????????
     @Override

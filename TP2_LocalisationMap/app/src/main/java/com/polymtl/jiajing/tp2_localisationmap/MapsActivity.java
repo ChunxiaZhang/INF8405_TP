@@ -22,6 +22,7 @@ import android.telephony.CellLocation;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.telephony.cdma.CdmaCellLocation;
+import android.telephony.gsm.GsmCellLocation;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -47,7 +48,6 @@ import com.polymtl.jiajing.tp2_localisationmap.model.BaseStation;
 import com.polymtl.jiajing.tp2_localisationmap.model.BetweenMarkers;
 import com.polymtl.jiajing.tp2_localisationmap.model.ConnectInfo;
 import com.polymtl.jiajing.tp2_localisationmap.model.ConnectMode;
-import com.polymtl.jiajing.tp2_localisationmap.model.ConnectNetworkInfo;
 import com.polymtl.jiajing.tp2_localisationmap.model.Frequency;
 import com.polymtl.jiajing.tp2_localisationmap.model.Itinerary;
 import com.polymtl.jiajing.tp2_localisationmap.model.Tp2Marker;
@@ -57,7 +57,7 @@ import com.polymtl.jiajing.tp2_localisationmap.service.AdjustCamera;
 import com.polymtl.jiajing.tp2_localisationmap.service.DetectConnectivity;
 import com.polymtl.jiajing.tp2_localisationmap.service.DrawPathAsyncTask;
 import com.polymtl.jiajing.tp2_localisationmap.service.DrawTp2Marker;
-import com.polymtl.jiajing.tp2_localisationmap.service.Tp2InfoWindowAdapter;
+import com.polymtl.jiajing.tp2_localisationmap.service.GetGsmCellLocation;
 import com.polymtl.jiajing.tp2_localisationmap.service.Tp2PolyLine;
 import com.polymtl.jiajing.tp2_localisationmap.tp2Test.TestData;
 
@@ -111,6 +111,7 @@ public class MapsActivity extends FragmentActivity {
     private Itinerary testItinerary; //used for testing
 
 
+    private Tp2Marker currentMarker;
     private List<Tp2Marker> markers;
 
 
@@ -119,8 +120,6 @@ public class MapsActivity extends FragmentActivity {
     private List<BaseStation> stations;
 
     private boolean isOpenTracking = false;
-
-    private boolean isConnected; //
 
     private DBHelper dbHelper;
 
@@ -141,32 +140,15 @@ public class MapsActivity extends FragmentActivity {
 
         locationManager =  (LocationManager) context.getSystemService(LOCATION_SERVICE);
 
-        //test
-       /* googleApiClient = new GoogleApiClient.Builder(MapsActivity.this)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();*/
-
-
-
-
         setUpMapIfNeeded();
 
         setUpButtons();
 
         setUpPopupDestination();
 
-         telephonyManager = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
-
-       /*Log.i("Mode initial:" , telephonyManager.getNetworkOperatorName() + " Phone Type:" + telephonyManager.getPhoneType());
-        Log.i("Power level: " , " " + power.getPowerLever() );
-        Log.i("Location: ", "longitude: " + location.getLongitude() + "  latitude:" + location.getLatitude());
-        Log.i("Time: " , " " + location.getTime());
-        Log.i("Mode connect: " , " " + connectMode.getProvider());*/
+        telephonyManager = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
 
         dbHelper = new DBHelper(getApplicationContext());
-
 
 
     }
@@ -218,15 +200,9 @@ public class MapsActivity extends FragmentActivity {
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
-        mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
         // Move the camera instantly to Montreal.
-        Log.i("setUpMap: " , "Move the camera instantly to Montreal.");
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(45.508536, -73.597929), 15));
-
-        /*if (!DetectConnectivity.isConnected(context)) {
-            Log.i("setUpMap:", "can not connect ");
-            return;
-        }*/
+//        Log.i("setUpMap: " , "Move the camera instantly to Montreal.");
+//        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(45.508536, -73.597929), 15));
         if (provider == null) {
             Log.i("setUpMap:" , "provider is null");
             return;
@@ -246,27 +222,27 @@ public class MapsActivity extends FragmentActivity {
         LatLng latLng = new LatLng(location.getLatitude(),location.getLongitude());
         DrawTp2Marker.setTp2Marker(MapsActivity.this, mMap, latLng);
         AdjustCamera.moveCamera(mMap,latLng, zoomLevel.getZoomLevel());
-
-        mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
-            @Override
-            public boolean onMyLocationButtonClick() {
-                Log.i("onMyLocationButtonClick", "click");
-                DrawTp2Marker.setTp2Marker(MapsActivity.this, mMap,
-                        new LatLng(location.getLatitude(),location.getLongitude()));
-
-                return false;
-            }
-        });
     }
-
-
 
     private void updateToNewLocation(Location location) {
 
-        Log.i("updatTonewLocation: " , "start");
-
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-        DrawTp2Marker.setTp2Marker(MapsActivity.this, mMap, latLng);
+
+        currentMarker = new Tp2Marker(location, MapsActivity.this);
+        if (markers.size() > 0) {
+            BetweenMarkers betweenMarkers = new BetweenMarkers(markers.get(markers.size()-1), currentMarker);
+            currentMarker.setDir_dep(betweenMarkers.getStringDir_dep());
+            currentMarker.setDrp(betweenMarkers.getDrp());
+            currentMarker.setVm(betweenMarkers.getVm());
+            //Dt is distance from the first marker to current marker
+            currentMarker.setDt(new BetweenMarkers(markers.get(0), currentMarker).getDrp());
+        }
+        //draw current marker
+        DrawTp2Marker.setTp2Marker(MapsActivity.this, mMap, currentMarker);
+
+        //add Tp2Marker
+        markers.add(currentMarker);
+
         AdjustCamera.moveCamera(mMap, latLng, zoomLevel.getZoomLevel());
     }
 
@@ -289,27 +265,12 @@ public class MapsActivity extends FragmentActivity {
             @Override
             public void onClick(View v) {
 
-
-                /* Don't need connected, trace can be done by GPS or network
-                if (!DetectConnectivity.isConnected(MapsActivity.this)) {
-                    new AlertDialog.Builder(MapsActivity.this)
-                            .setMessage("Maps is offline. Check your network connection.")
-                            .setIcon(android.R.drawable.ic_dialog_alert)
-                            .setTitle("Offline")
-                            .setNegativeButton(android.R.string.ok, null).show();
-                    Log.i("setUpButton:", "not connect");
-                    return;
-                }*/
-
                 if(isOpenTracking) { //stop tracking
                     locationManager.removeUpdates(tp2Locationlistener);
                     telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
 
                     btn_start_stop.setBackground(getResources().getDrawable(R.drawable.start));
                     isOpenTracking = false;
-
-                    //Show battery level
-                    Toast.makeText(MapsActivity.this, "Battery level: " + power.getPowerLever(), Toast.LENGTH_LONG);
 
                     //set thisItinerary
                     thisItinerary.setStartTime(markers.get(0).getIm());
@@ -337,16 +298,29 @@ public class MapsActivity extends FragmentActivity {
 
                 }
                 else { //start tracking
-                    //Show battery level
-                    Toast.makeText(context, "Battery level: " + power.getPowerLever(), Toast.LENGTH_LONG);
-
+                    //clear the map
+                    mMap.clear();
                     markers = new ArrayList<>();
                     stations = new ArrayList<>();
 
                     thisItinerary = new Itinerary();//initial this itinerary
 
                     //add the first marker
-                    markers.add(new Tp2Marker(location, context));
+                    if(location == null) {
+                        Log.i("Start tracking:", "location can't be fined");
+                        Toast.makeText(MapsActivity.this, "Cannot get location, please make sure there is location serveice.",
+                                Toast.LENGTH_LONG).show();
+
+                        mMap.addMarker(new MarkerOptions().position(new LatLng(45.508536, -73.597929)).title("Marker"));
+                        // Move the camera instantly to Montreal.
+                        Log.i("Start tracking: " , "Move the camera instantly to Montreal.");
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(45.508536, -73.597929), 15));
+                        return;
+                    }
+                    currentMarker = new Tp2Marker(location, context);
+                    markers.add(currentMarker);
+                    //draw the first current marker
+                    DrawTp2Marker.setTp2Marker(MapsActivity.this, mMap, currentMarker);
 
                     //request listening location changed
                     //minDistance is 10 metres
@@ -406,23 +380,6 @@ public class MapsActivity extends FragmentActivity {
 
     }
 
-    /////////test
-   /* @Override
-    public void onConnected(Bundle bundle) {
-
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-
-    }*/
-    //////////////////
-
     private final class Tp2LocationListener implements LocationListener {
 
 
@@ -433,20 +390,9 @@ public class MapsActivity extends FragmentActivity {
             Log.i("LocationListener: ", "Location changed");
             updateToNewLocation(location);
 
-            Tp2Marker currentMarker = new Tp2Marker(location, MapsActivity.this);
-            if (markers.size() > 0) {
-                BetweenMarkers betweenMarkers = new BetweenMarkers(markers.get(markers.size()-1), currentMarker);
-                currentMarker.setDir_dep(betweenMarkers.getStringDir_dep());
-                currentMarker.setDrp(betweenMarkers.getDrp());
-                currentMarker.setVm(betweenMarkers.getVm());
-                //Dt is distance from the first marker to current marker
-                currentMarker.setDt(new BetweenMarkers(markers.get(0), currentMarker).getDrp());
-            }
-            //draw current marker
-            DrawTp2Marker.setTp2Marker(MapsActivity.this, mMap, currentMarker);
+            //need to add marker in database
+            //??????????????????????
 
-            //add Tp2Marker
-            markers.add(currentMarker);
 
         }
 
@@ -488,76 +434,40 @@ public class MapsActivity extends FragmentActivity {
             //Cell location changed listener
             @Override
             public void onCellLocationChanged(CellLocation cellLocation) {
-                String LOG_TAG = "PhoneStateListener";
 
                 //number station increase
                 thisItinerary.increaseNbr_sb();
 
-                connectInfo = new ConnectNetworkInfo(MapsActivity.this);
+                BaseStation station = new BaseStation();
+
+                if (cellLocation instanceof GsmCellLocation) {
 
 
+                    if (getGsmCellLocation() != null) {
+                        station.setLatitude(getGsmCellLocation().latitude);
+                        station.setLongitude(getGsmCellLocation().longitude);
+                    }
 
+                }
                 if (cellLocation instanceof CdmaCellLocation) {
 
-                    BaseStation station = new BaseStation();
-                    CdmaCellLocation ccLoc = (CdmaCellLocation) cellLocation;
 
-                    station.setLatitude(ccLoc.getBaseStationLatitude());
-                    station.setLongitude(ccLoc.getBaseStationLongitude());
-
-                    //Draw station marker
-                    DrawTp2Marker.setStationMarker(MapsActivity.this, mMap, station);
-
-                    //add station to list
-                    stations.add(station);
+                    CdmaCellLocation cdmaCellLocation = (CdmaCellLocation) cellLocation;
+                    if (cdmaCellLocation != null) {
+                        station.setLatitude(cdmaCellLocation.getBaseStationLatitude());
+                        station.setLongitude(cdmaCellLocation.getBaseStationLongitude());
+                    }
 
                 }
 
 
+                //Draw station marker
+                DrawTp2Marker.setStationMarker(MapsActivity.this, mMap, station);
 
-                /*if (cellLocation instanceof GsmCellLocation) {
-                    GsmCellLocation gcLoc = (GsmCellLocation) cellLocation;
-                    Log.i(LOG_TAG,
-                            "onCellLocationChanged: GsmCellLocation "
-                                    + gcLoc.toString());
-                    Log.i(LOG_TAG, "onCellLocationChanged: GsmCellLocation getCid "
-                            + gcLoc.getCid());
-                    Log.i(LOG_TAG, "onCellLocationChanged: GsmCellLocation getLac "
-                            + gcLoc.getLac());
-                    Log.i(LOG_TAG, "onCellLocationChanged: GsmCellLocation getPsc"
-                            + gcLoc.getPsc()); // Requires min API 9
+                //add station to list
+                stations.add(station);
 
-                    //for test
-                    Toast.makeText(MapsActivity.this,"Gsm: Cid" + gcLoc.getCid() +
-                            "Lac:" + gcLoc.getLac() + "Psc:" + gcLoc.getPsc(), Toast.LENGTH_LONG);
-                } else if (cellLocation instanceof CdmaCellLocation) {
-
-                    CdmaCellLocation ccLoc = (CdmaCellLocation) cellLocation;
-                    Log.i(LOG_TAG,
-                            "onCellLocationChanged: CdmaCellLocation "
-                                    + ccLoc.toString());
-                    Log.i(LOG_TAG,
-                            "onCellLocationChanged: CdmaCellLocation getBaseStationId "
-                                    + ccLoc.getBaseStationId());
-                    Log.i(LOG_TAG,
-                            "onCellLocationChanged: CdmaCellLocation getBaseStationLatitude "
-                                    + ccLoc.getBaseStationLatitude());
-                    Log.i(LOG_TAG,
-                            "onCellLocationChanged: CdmaCellLocation getBaseStationLongitude"
-                                    + ccLoc.getBaseStationLongitude());
-                    Log.i(LOG_TAG,
-                            "onCellLocationChanged: CdmaCellLocation getNetworkId "
-                                    + ccLoc.getNetworkId());
-                    Log.i(LOG_TAG,
-                            "onCellLocationChanged: CdmaCellLocation getSystemId "
-                                    + ccLoc.getSystemId());
-                    //for test
-                    Toast.makeText(MapsActivity.this,"ccLoc: CdmaCellLocation" + ccLoc.toString() +
-                            "Latitude:" + ccLoc.getBaseStationLatitude() +
-                            "Longitude:" + ccLoc.getBaseStationLongitude(), Toast.LENGTH_LONG);
-                } else {
-                    Log.i(LOG_TAG, "onCellLocationChanged: " + location.toString());
-                }*/
+                //save station to database
 
 
             }
@@ -565,9 +475,6 @@ public class MapsActivity extends FragmentActivity {
 
         telephonyManager.listen(phoneStateListener, LISTEN_CELL_LOCATION);
     }
-
-
-
 
 
     @Override
@@ -656,6 +563,7 @@ public class MapsActivity extends FragmentActivity {
                 if (to.getText().length() > 0) {
                     btn_search.setEnabled(true);
                     addressTo = to.getText().toString();
+                    Log.i("to address:", addressTo);
                 }
             }
         });
@@ -673,12 +581,17 @@ public class MapsActivity extends FragmentActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
+
                 addressFrom = from.getText().toString();
             }
         });
         btn_search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+            if(addressTo == null || addressTo.isEmpty()){
+                //the destination address hasn't been entered
+                Toast.makeText(getApplicationContext(), "Please enter an address of destination!", Toast.LENGTH_LONG).show();
+            }else{
                 destinationPopup.dismiss();
                 destinationPopup.setFocusable(false);
 
@@ -689,7 +602,6 @@ public class MapsActivity extends FragmentActivity {
                 if (fromLatLng == null) {
                     //Set current location as from point
                     Location locationFrom = locationManager.getLastKnownLocation(provider);
-
                     fromLatLng = new LatLng(locationFrom.getLatitude(), locationFrom.getLongitude());
                 }
                 toLatLng = getLocationFromAddress(addressTo);
@@ -705,12 +617,9 @@ public class MapsActivity extends FragmentActivity {
                 DrawTp2Marker.setTp2Marker(MapsActivity.this, mMap, fromLatLng);
                 DrawTp2Marker.setTp2Marker(MapsActivity.this, mMap, toLatLng);
 
-                //InfoWindowAdapter show information
-                mMap.setInfoWindowAdapter(new Tp2InfoWindowAdapter(MapsActivity.this));
-
                 Log.i("destination:",points.size() + ": " + points.get(0).toString() + ", " + points.get(1));
                 AdjustCamera.fixZoom(mMap, points);
-
+            }
             }
         });
 
@@ -718,6 +627,48 @@ public class MapsActivity extends FragmentActivity {
 
     private void showItinerary(long itinerary_id) {
 
+    }
+
+    public LatLng getGsmCellLocation() {
+
+        LatLng result = null;
+
+        TelephonyManager telephonyManager = (TelephonyManager)getSystemService(MapsActivity.this.TELEPHONY_SERVICE);
+
+        GsmCellLocation gsmCellLocation = (GsmCellLocation)telephonyManager.getCellLocation();
+
+        String networkOperator = telephonyManager.getNetworkOperator();
+        String mcc = networkOperator.substring(0, 3);
+        String mnc = networkOperator.substring(3);
+
+
+        int cid = gsmCellLocation.getCid();
+        int lac = gsmCellLocation.getLac();
+
+
+        GetGsmCellLocation getLocation = new GetGsmCellLocation();
+
+        getLocation.setMcc(mcc);
+        getLocation.setMnc(mnc);
+        getLocation.setCallID(cid);
+        getLocation.setCallLac(lac);
+        try {
+
+            Log.i("getLocation", getLocation.getLocation());
+
+            if(!getLocation.isError()){
+                result = getLocation.getLocationLatLng();
+
+            }else{
+                Log.i("getLocation", "Error");
+            }
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            Log.i("Exception: ",   e.toString());
+        }
+
+        return result;
     }
 
     private void prepareTestData() {
@@ -806,4 +757,7 @@ public class MapsActivity extends FragmentActivity {
         AdjustCamera.fixZoom(mMap, points);
 
     }
+
+
+
 }

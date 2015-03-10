@@ -4,9 +4,7 @@ import android.content.Context;
 import android.location.Location;
 import android.net.NetworkInfo;
 
-/**
- * Created by Jiajing on 2015/3/5.
- */
+
 public class MarkerNetwork extends Tp2Marker{
     private ConnectNetworkInfo connectInfo;
     private String info;
