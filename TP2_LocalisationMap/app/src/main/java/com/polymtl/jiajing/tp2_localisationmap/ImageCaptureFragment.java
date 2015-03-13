@@ -29,7 +29,6 @@ import java.util.List;
  */
 public class ImageCaptureFragment extends DialogFragment{
     private static String TAG = "ImageCaptureFragment";
-    private int idMaker = -1;
     private SurfaceView surfaceViewImgCapture;
     private SurfaceHolder surfaceHolder;
     private ImageButton btnImgCapture;
@@ -62,9 +61,6 @@ public class ImageCaptureFragment extends DialogFragment{
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.fragment_imagecapture, null);
-
-        //get id maker
-        idMaker = getArguments().getInt("idMaker");
 
         surfaceViewImgCapture = (SurfaceView) view.findViewById(R.id.surfaceViewImgCap);
         surfaceHolder = surfaceViewImgCapture.getHolder();
@@ -119,7 +115,7 @@ public class ImageCaptureFragment extends DialogFragment{
                 case R.id.btn_imgsave:
                     String picturePath = CameraOperations.getInstance().doSavePicture();
                     PictureTakenListener listener = (PictureTakenListener) getActivity();
-                    listener.pictureTaken(idMaker, picturePath);
+                    listener.pictureTaken(picturePath);
                     dismiss();
                     break;
                 case R.id.btn_imgcancel:
@@ -137,6 +133,6 @@ public class ImageCaptureFragment extends DialogFragment{
     }
 
     public interface PictureTakenListener {
-        void pictureTaken(int idMaker, String picturePath);
+        void pictureTaken(String picturePath);
     }
 }

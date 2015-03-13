@@ -112,6 +112,8 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
 
     private DBHelper dbHelper;
 
+    private boolean alertImgCapIsShowing = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -229,17 +231,20 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
 
         AdjustCamera.moveCamera(mMap, latLng, zoomLevel.getZoomLevel());
         //alert for taking pictures
-        if(isOpenTracking){
+        if(isOpenTracking && !alertImgCapIsShowing){
+            alertImgCapIsShowing = true;
             new AlertDialog.Builder(MapsActivity.this).setMessage("Do you want to take a picture of the current location?")
-                    .setNegativeButton("Cancel", null)
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            alertImgCapIsShowing = false;
+                        }
+                    })
                     .setPositiveButton("OK",new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             android.support.v4.app.FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                            Bundle bundle = new Bundle();
-                            bundle.putInt("idMaker",currentMarker.getId());
                             DialogFragment imgCapFrag = new ImageCaptureFragment();
-                            imgCapFrag.setArguments(bundle);
                             imgCapFrag.show(ft, "dialog");
                         }
                     }).show();
@@ -249,12 +254,11 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
 
     /**
      * launch after a picture is taken and saved
-     * @param idMaker
      * @param picturePath
      */
     @Override
-    public void pictureTaken(int idMaker, String picturePath) {
-        markers.get(idMaker).setPicturePath(picturePath);
+    public void pictureTaken(String picturePath) {
+        markers.get(markers.size()-1).setPicturePath(picturePath);
         //TODO set pictures for windows adapter
     }
 

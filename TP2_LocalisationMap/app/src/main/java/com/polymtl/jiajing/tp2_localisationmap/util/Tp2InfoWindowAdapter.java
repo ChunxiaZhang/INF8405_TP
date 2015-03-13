@@ -80,23 +80,4 @@ public class Tp2InfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
 //                        | DateUtils.FORMAT_NUMERIC_DATE);
 //    }
 
-
-    /*private String getDate(String dateString) {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-
-        formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
-        Date value = null;
-        try {
-            value = formatter.parse(dateString);
-        } catch (ParseException e) {
-
-            e.printStackTrace();
-        }
-        SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy hh:mmaa");
-        dateFormatter.setTimeZone(TimeZone.getDefault());
-        String dt = dateFormatter.format(value);
-
-        return dt;
-    }*/
-
 }
