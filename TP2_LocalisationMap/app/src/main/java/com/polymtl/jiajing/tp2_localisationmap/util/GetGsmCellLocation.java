@@ -1,4 +1,4 @@
-package com.polymtl.jiajing.tp2_localisationmap.service;
+package com.polymtl.jiajing.tp2_localisationmap.util;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.apache.http.HttpResponse;

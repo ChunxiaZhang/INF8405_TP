@@ -7,14 +7,13 @@ import android.content.DialogInterface;
 
 import android.graphics.drawable.BitmapDrawable;
 import android.location.LocationProvider;
-
 import android.location.Address;
-
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
@@ -23,16 +22,16 @@ import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.telephony.cdma.CdmaCellLocation;
 import android.telephony.gsm.GsmCellLocation;
+import static android.telephony.PhoneStateListener.LISTEN_CELL_LOCATION;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
+
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 
 import android.widget.EditText;
-
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
@@ -53,23 +52,21 @@ import com.polymtl.jiajing.tp2_localisationmap.model.Itinerary;
 import com.polymtl.jiajing.tp2_localisationmap.model.Tp2Marker;
 import com.polymtl.jiajing.tp2_localisationmap.model.Power;
 import com.polymtl.jiajing.tp2_localisationmap.model.ZoomLevel;
-import com.polymtl.jiajing.tp2_localisationmap.service.AdjustCamera;
-import com.polymtl.jiajing.tp2_localisationmap.service.DetectConnectivity;
-import com.polymtl.jiajing.tp2_localisationmap.service.DrawPathAsyncTask;
-import com.polymtl.jiajing.tp2_localisationmap.service.DrawTp2Marker;
-import com.polymtl.jiajing.tp2_localisationmap.service.GetGsmCellLocation;
-import com.polymtl.jiajing.tp2_localisationmap.service.Tp2PolyLine;
+import com.polymtl.jiajing.tp2_localisationmap.util.AdjustCamera;
+import com.polymtl.jiajing.tp2_localisationmap.util.DetectConnectivity;
+import com.polymtl.jiajing.tp2_localisationmap.util.DrawPathAsyncTask;
+import com.polymtl.jiajing.tp2_localisationmap.util.DrawTp2Marker;
+import com.polymtl.jiajing.tp2_localisationmap.util.GetGsmCellLocation;
+import com.polymtl.jiajing.tp2_localisationmap.util.Tp2PolyLine;
 import com.polymtl.jiajing.tp2_localisationmap.tp2Test.TestData;
+import static com.polymtl.jiajing.tp2_localisationmap.util.Tp2PolyLine.*;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import android.util.Log;
 
-import static android.telephony.PhoneStateListener.LISTEN_CELL_LOCATION;
-import static com.polymtl.jiajing.tp2_localisationmap.service.Tp2PolyLine.*;
-
-
-public class MapsActivity extends FragmentActivity {
+public class MapsActivity extends FragmentActivity implements ImageCaptureFragment.PictureTakenListener{
 
     private Context context;
 
@@ -90,12 +87,10 @@ public class MapsActivity extends FragmentActivity {
 
     private LocationManager locationManager;
     private Location location;
-    private String provider; //
+    private String provider;
 
-    //private ConnectGPSInfo connectGPSInfo;
     private ConnectInfo connectInfo;
 
-    //private ConnectMode connectMode;
     private Power power;
     private ZoomLevel zoomLevel = new ZoomLevel();
     private Frequency frequency = new Frequency();
@@ -103,20 +98,14 @@ public class MapsActivity extends FragmentActivity {
 
     final Tp2LocationListener tp2Locationlistener = new Tp2LocationListener();
 
-
-
     private Itinerary thisItinerary;
     long itinerary_id;
-
     private Itinerary testItinerary; //used for testing
 
 
     private Tp2Marker currentMarker;
     private List<Tp2Marker> markers;
-
-
     private List<Tp2Marker> testMarkers;
-
     private List<BaseStation> stations;
 
     private boolean isOpenTracking = false;
@@ -129,28 +118,22 @@ public class MapsActivity extends FragmentActivity {
         setContentView(R.layout.activity_maps);
 
         context = getApplicationContext();
+        power = new Power(getApplicationContext());
 
         provider = getIntent().getStringExtra("connectMode"); //get provider defined by user
-
-        power = new Power(getApplicationContext());
         zoomLevel.setZoomLevel(getIntent().getIntExtra("zoom", zoomLevel.getZoomLevel()));
         frequency.setTime(getIntent().getIntExtra("frequency", frequency.getFrequency()));
 
         isOpenTracking = false;
 
         locationManager =  (LocationManager) context.getSystemService(LOCATION_SERVICE);
-
-        setUpMapIfNeeded();
-
-        setUpButtons();
-
-        setUpPopupDestination();
-
         telephonyManager = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
 
+        setUpMapIfNeeded();
+        setUpButtons();
+        setUpPopupDestination();
+
         dbHelper = new DBHelper(getApplicationContext());
-
-
     }
 
     @Override
@@ -163,11 +146,11 @@ public class MapsActivity extends FragmentActivity {
      * Sets up the map if it is possible to do so (i.e., the Google Play services APK is correctly
      * installed) and the map has not already been instantiated.. This will ensure that we only ever
      * call {@link #setUpMap()} once when {@link #mMap} is not null.
-     * <p/>
+     *
      * If it isn't installed {@link SupportMapFragment} (and
      * {@link com.google.android.gms.maps.MapView MapView}) will show a prompt for the user to
      * install/update the Google Play services APK on their device.
-     * <p/>
+     *
      * A user can return to this FragmentActivity after following the prompt and correctly
      * installing/updating/enabling the Google Play services. Since the FragmentActivity may not
      * have been completely destroyed during this process (it is likely that it would only be
@@ -175,20 +158,17 @@ public class MapsActivity extends FragmentActivity {
      * method in {@link #onResume()} to guarantee that it will be called.
      */
     private void setUpMapIfNeeded() {
-
         // Do a null check to confirm that we have not already instantiated the map.
         if (mMap == null) {
             // Try to obtain the map from the SupportMapFragment.
             mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapView))
                     .getMap();
-
             // Then enable the My Location layer on the Map
             //The My Location button will be visible on the top right of the map.
             mMap.setMyLocationEnabled(true);
 
             // Check if we were successful in obtaining the map.
             if (mMap != null) {
-
                 setUpMap();
             }
         }
@@ -201,8 +181,9 @@ public class MapsActivity extends FragmentActivity {
      */
     private void setUpMap() {
         // Move the camera instantly to Montreal.
-//        Log.i("setUpMap: " , "Move the camera instantly to Montreal.");
-//        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(45.508536, -73.597929), 15));
+        Log.i("setUpMap: " , "Move the camera instantly to Montreal.");
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(45.508536, -73.597929), 15));
+
         if (provider == null) {
             Log.i("setUpMap:" , "provider is null");
             return;
@@ -211,7 +192,6 @@ public class MapsActivity extends FragmentActivity {
             Log.i("setUpMap:" , "locationManager is null");
             return;
         }
-
 
         location = locationManager.getLastKnownLocation(provider);
         if (location == null) {
@@ -224,8 +204,9 @@ public class MapsActivity extends FragmentActivity {
         AdjustCamera.moveCamera(mMap,latLng, zoomLevel.getZoomLevel());
     }
 
-    private void updateToNewLocation(Location location) {
 
+
+    private void updateToNewLocation(Location location) {
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
 
         currentMarker = new Tp2Marker(location, MapsActivity.this);
@@ -240,14 +221,44 @@ public class MapsActivity extends FragmentActivity {
         //draw current marker
         DrawTp2Marker.setTp2Marker(MapsActivity.this, mMap, currentMarker);
 
+        //set id of the marker
+        currentMarker.setId(markers.size());
+
         //add Tp2Marker
         markers.add(currentMarker);
 
         AdjustCamera.moveCamera(mMap, latLng, zoomLevel.getZoomLevel());
+        //alert for taking pictures
+        if(isOpenTracking){
+            new AlertDialog.Builder(MapsActivity.this).setMessage("Do you want to take a picture of the current location?")
+                    .setNegativeButton("Cancel", null)
+                    .setPositiveButton("OK",new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            android.support.v4.app.FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                            Bundle bundle = new Bundle();
+                            bundle.putInt("idMaker",currentMarker.getId());
+                            DialogFragment imgCapFrag = new ImageCaptureFragment();
+                            imgCapFrag.setArguments(bundle);
+                            imgCapFrag.show(ft, "dialog");
+                        }
+                    }).show();
+        }
+
+    }
+
+    /**
+     * launch after a picture is taken and saved
+     * @param idMaker
+     * @param picturePath
+     */
+    @Override
+    public void pictureTaken(int idMaker, String picturePath) {
+        markers.get(idMaker).setPicturePath(picturePath);
+        //TODO set pictures for windows adapter
     }
 
     private void setUpButtons() {
-
         btn_fromTo = (ImageButton) findViewById(R.id.btn_destination);
         btn_start_stop = (ImageButton) findViewById(R.id.btn_start_stop);
         btn_state_info = (ImageButton) findViewById(R.id.btn_state_info);
@@ -256,15 +267,13 @@ public class MapsActivity extends FragmentActivity {
 
         if(isOpenTracking) {
             btn_start_stop.setBackground(getResources().getDrawable(R.drawable.stop));
-        }
-        else {
+        }else {
             btn_start_stop.setBackground(getResources().getDrawable(R.drawable.start));
         }
 
         btn_start_stop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 if(isOpenTracking) { //stop tracking
                     locationManager.removeUpdates(tp2Locationlistener);
                     telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
@@ -295,11 +304,10 @@ public class MapsActivity extends FragmentActivity {
                     //Show all markers in the map and information about this itinerary
                     /////
 
-
-                }
-                else { //start tracking
+                }else { //start tracking
                     //clear the map
                     mMap.clear();
+
                     markers = new ArrayList<>();
                     stations = new ArrayList<>();
 
@@ -318,7 +326,13 @@ public class MapsActivity extends FragmentActivity {
                         return;
                     }
                     currentMarker = new Tp2Marker(location, context);
+
+                    //set id of the marker
+                    currentMarker.setId(markers.size());
+
                     markers.add(currentMarker);
+
+
                     //draw the first current marker
                     DrawTp2Marker.setTp2Marker(MapsActivity.this, mMap, currentMarker);
 
@@ -329,9 +343,7 @@ public class MapsActivity extends FragmentActivity {
                     isOpenTracking = true;
 
                     //start listening cell location changed
-                    setUpPhoneStateListener();
-
-
+//                    setUpPhoneStateListener();
                 }
             }
         });
@@ -350,7 +362,6 @@ public class MapsActivity extends FragmentActivity {
                 }
 
                 destinationPopup.setAnimationStyle(R.style.PopupAnimation);
-
                 destinationPopup.showAtLocation(findViewById(R.id.btn_destination), Gravity.NO_GRAVITY, 0, 0);
                 destinationPopup.setFocusable(true);
                 destinationPopup.update();
@@ -360,14 +371,12 @@ public class MapsActivity extends FragmentActivity {
         btn_state_info.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
             }
         });
 
         btn_camera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
             }
         });
 
@@ -381,19 +390,13 @@ public class MapsActivity extends FragmentActivity {
     }
 
     private final class Tp2LocationListener implements LocationListener {
-
-
         //Called when the location has changed.
         @Override
         public void onLocationChanged(Location location) {
-
             Log.i("LocationListener: ", "Location changed");
             updateToNewLocation(location);
-
             //need to add marker in database
             //??????????????????????
-
-
         }
 
         //Called when the provider status changes.
@@ -408,11 +411,9 @@ public class MapsActivity extends FragmentActivity {
             }
         }
 
-
         //Called when the provider is enabled by the user.
         @Override
         public void onProviderEnabled(String provider) {
-
             Log.i("LocationListener: ", provider + ": Provider Enabled");
             //location = locationManager.getLastKnownLocation(provider);
         }
@@ -420,7 +421,6 @@ public class MapsActivity extends FragmentActivity {
         //Called when the provider is disabled by the user.
         @Override
         public void onProviderDisabled(String provider) {
-
             Log.i("LocationListener: ", provider + ": Provider Disabled");
             //updateToNewLocation(null);
         }
@@ -434,48 +434,34 @@ public class MapsActivity extends FragmentActivity {
             //Cell location changed listener
             @Override
             public void onCellLocationChanged(CellLocation cellLocation) {
-
                 //number station increase
                 thisItinerary.increaseNbr_sb();
 
                 BaseStation station = new BaseStation();
-
                 if (cellLocation instanceof GsmCellLocation) {
-
-
                     if (getGsmCellLocation() != null) {
                         station.setLatitude(getGsmCellLocation().latitude);
                         station.setLongitude(getGsmCellLocation().longitude);
                     }
-
                 }
                 if (cellLocation instanceof CdmaCellLocation) {
-
-
                     CdmaCellLocation cdmaCellLocation = (CdmaCellLocation) cellLocation;
                     if (cdmaCellLocation != null) {
                         station.setLatitude(cdmaCellLocation.getBaseStationLatitude());
                         station.setLongitude(cdmaCellLocation.getBaseStationLongitude());
                     }
-
                 }
-
 
                 //Draw station marker
                 DrawTp2Marker.setStationMarker(MapsActivity.this, mMap, station);
-
                 //add station to list
                 stations.add(station);
 
                 //save station to database
-
-
             }
         };
-
         telephonyManager.listen(phoneStateListener, LISTEN_CELL_LOCATION);
     }
-
 
     @Override
     public void onBackPressed() {
@@ -486,7 +472,6 @@ public class MapsActivity extends FragmentActivity {
         } else {
             super.onBackPressed();
         }
-
     }
 
     @Override
@@ -518,23 +503,19 @@ public class MapsActivity extends FragmentActivity {
 
         try {
             addresses = geocoder.getFromLocationName(strAddress, 5);
-
             if (addresses == null || addresses.size() <= 0) { //didn't find location by this address
                 return null;
             }
             Address location = addresses.get(0);
-
             point = new LatLng(location.getLatitude(), location.getLongitude());
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-
         return point;
     }
 
 
     private void setUpPopupDestination() {
-
         LayoutInflater inflater = LayoutInflater.from(this);
         destinationView = inflater.inflate(R.layout.popup_destination, null);
         destinationPopup = new PopupWindow(destinationView,
@@ -551,15 +532,11 @@ public class MapsActivity extends FragmentActivity {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                 btn_search.setEnabled(false);
             }
-
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-
             }
-
             @Override
             public void afterTextChanged(Editable s) {
-
                 if (to.getText().length() > 0) {
                     btn_search.setEnabled(true);
                     addressTo = to.getText().toString();
@@ -571,32 +548,22 @@ public class MapsActivity extends FragmentActivity {
         from.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
             }
-
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-
             }
-
             @Override
             public void afterTextChanged(Editable s) {
-
                 addressFrom = from.getText().toString();
             }
         });
         btn_search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-            if(addressTo == null || addressTo.isEmpty()){
-                //the destination address hasn't been entered
-                Toast.makeText(getApplicationContext(), "Please enter an address of destination!", Toast.LENGTH_LONG).show();
-            }else{
                 destinationPopup.dismiss();
                 destinationPopup.setFocusable(false);
 
                 List<LatLng> points = new ArrayList<>();
-
                 fromLatLng = getLocationFromAddress(addressFrom);
 
                 if (fromLatLng == null) {
@@ -620,7 +587,6 @@ public class MapsActivity extends FragmentActivity {
                 Log.i("destination:",points.size() + ": " + points.get(0).toString() + ", " + points.get(1));
                 AdjustCamera.fixZoom(mMap, points);
             }
-            }
         });
 
     }
@@ -630,7 +596,6 @@ public class MapsActivity extends FragmentActivity {
     }
 
     public LatLng getGsmCellLocation() {
-
         LatLng result = null;
 
         TelephonyManager telephonyManager = (TelephonyManager)getSystemService(MapsActivity.this.TELEPHONY_SERVICE);
@@ -641,24 +606,17 @@ public class MapsActivity extends FragmentActivity {
         String mcc = networkOperator.substring(0, 3);
         String mnc = networkOperator.substring(3);
 
-
         int cid = gsmCellLocation.getCid();
         int lac = gsmCellLocation.getLac();
-
-
         GetGsmCellLocation getLocation = new GetGsmCellLocation();
-
         getLocation.setMcc(mcc);
         getLocation.setMnc(mnc);
         getLocation.setCallID(cid);
         getLocation.setCallLac(lac);
         try {
-
             Log.i("getLocation", getLocation.getLocation());
-
             if(!getLocation.isError()){
                 result = getLocation.getLocationLatLng();
-
             }else{
                 Log.i("getLocation", "Error");
             }
@@ -667,7 +625,6 @@ public class MapsActivity extends FragmentActivity {
             e.printStackTrace();
             Log.i("Exception: ",   e.toString());
         }
-
         return result;
     }
 
@@ -688,24 +645,16 @@ public class MapsActivity extends FragmentActivity {
         }
 
         Itinerary test = dbHelper.getItinerary(1424924854700l);
-
         if (test == null) {
             Log.i("test get itinerary", " " + "test is null");
         }
-
         Log.i("test get itinerary", " getDt " + test.getDt());
         Log.i("test get itinerary", "getStartTime " + test.getStartTime());
         Log.i("test get itinerary", " getNbr_sb " + test.getNbr_sb()); //????why it changed to 0
-
-
         showTestItinerary();
     }
 
-
-
-
     private void showTestItinerary() {
-
         TestData testData = new TestData();
         testData.setTestItinerary(getApplicationContext(), provider);
         testItinerary = testData.getTestItinerary();
@@ -720,11 +669,9 @@ public class MapsActivity extends FragmentActivity {
         }
 
         Itinerary test = dbHelper.getItinerary(1424924854700l);
-
         if (test == null) {
             Log.i("test get itinerary", " " + "test is null");
         }
-
         Log.i("test get itinerary", " getDt " + test.getDt());
         Log.i("test get itinerary", "getStartTime " + test.getStartTime());
         Log.i("test get itinerary", " getNbr_sb " + test.getNbr_sb()); //????why it changed to 0
@@ -737,27 +684,18 @@ public class MapsActivity extends FragmentActivity {
         from = i.next().getLatLng();
         DrawTp2Marker.setTp2Marker(MapsActivity.this, mMap, from);
 
-
         while (i.hasNext()) {
             Log.i("test:", "has next");
-
             Tp2Marker p = i.next();
-
             to = p.getLatLng();
 
             DrawTp2Marker.setTp2Marker(MapsActivity.this, mMap, to);
             Log.i("test:", "set a marker " + n++);
-
             Tp2PolyLine.drawLineBetweenTwoMarkers(mMap, from, to);
             from = to;
-
             points.add(p.getLatLng());
         }
-
         AdjustCamera.fixZoom(mMap, points);
-
     }
-
-
 
 }

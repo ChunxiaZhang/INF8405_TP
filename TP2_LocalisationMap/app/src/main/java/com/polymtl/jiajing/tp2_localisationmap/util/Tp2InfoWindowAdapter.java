@@ -1,8 +1,7 @@
-package com.polymtl.jiajing.tp2_localisationmap.service;
+package com.polymtl.jiajing.tp2_localisationmap.util;
 
 import android.content.Context;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -10,13 +9,7 @@ import android.widget.TextView;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.polymtl.jiajing.tp2_localisationmap.R;
-import com.polymtl.jiajing.tp2_localisationmap.model.Direction;
 import com.polymtl.jiajing.tp2_localisationmap.model.Tp2Marker;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
 
 /**
  * Created by Zoe on 15-02-27.
@@ -50,7 +43,7 @@ public class Tp2InfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
 
         TextView title = (TextView) v.findViewById(R.id.title);
 
-        title.setText(timeFromUTCSecs(context, tp2Marker.getIm()));//set tile with time
+        title.setText(tp2Marker.getIm());//set tile with time
 
         TextView info = (TextView) v.findViewById(R.id.info);
 
@@ -62,7 +55,7 @@ public class Tp2InfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
 
     public String getInfo() {
         String info = "";
-        info += "lat/lng:(" + tp2Marker.getLatitude() + ", " + tp2Marker.getLongitude();
+        info += "lat/lng:(" + tp2Marker.getLatitude() + ", " + tp2Marker.getLongitude()+")";
         info += "\nAlt:" + tp2Marker.getAltitude();
         info += "\nDir_dep:" + tp2Marker.getDir_dep();
         info += "\nDrp:" + tp2Marker.getDrp() + "  Vm:" + tp2Marker.getVm() + " Dt:" + tp2Marker.getDt();;

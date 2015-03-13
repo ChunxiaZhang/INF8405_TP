@@ -81,7 +81,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     //Table create statements
     private static final String CREATE_TABLE_ITINERARY = "CREATE TABLE " + TABLE_ITINERARY +
-            " (" + KEY_ID + " INTEGER PRIMARY KEY," + KEY_DT + " FLOAT," + KEY_START_TIME + " LONG," + KEY_STOP_TIME + " LONG," +
+            " (" + KEY_ID + " INTEGER PRIMARY KEY," + KEY_DT + " STRING," + KEY_START_TIME + " LONG," + KEY_STOP_TIME + " LONG," +
             KEY_NBR_SB + " INTEGER, " + KEY_POWER_CONSUMPTION + " FLOAT" + ")";
 
 
@@ -160,8 +160,8 @@ public class DBHelper extends SQLiteOpenHelper {
         }
 
         itinerary.setDt(cursor.getFloat(cursor.getColumnIndex(KEY_DT)));
-        itinerary.setStartTime(cursor.getLong(cursor.getColumnIndex(KEY_START_TIME)));
-        itinerary.setStopTime(cursor.getLong(cursor.getColumnIndex(KEY_STOP_TIME)));
+        itinerary.setStartTime(cursor.getString(cursor.getColumnIndex(KEY_START_TIME)));
+        itinerary.setStopTime(cursor.getString(cursor.getColumnIndex(KEY_STOP_TIME)));
         itinerary.setNbr_sb(cursor.getInt(cursor.getColumnIndex(KEY_NBR_SB)));
         Log.e(LOG, "setNbr_sb " + cursor.getInt(cursor.getColumnIndex(KEY_NBR_SB))); //????why it changed to 0
         itinerary.setAllPowerConsumption(cursor.getFloat(cursor.getColumnIndex(KEY_POWER_CONSUMPTION)));
@@ -185,8 +185,8 @@ public class DBHelper extends SQLiteOpenHelper {
             itinerary.setDt(cursor.getLong(cursor.getColumnIndex(KEY_DT)));
             itinerary.setAllPowerConsumption(cursor.getFloat(cursor.getColumnIndex(KEY_POWER_CONSUMPTION)));
             itinerary.setNbr_sb(cursor.getInt(cursor.getColumnIndex(KEY_NBR_SB)));
-            itinerary.setStartTime(cursor.getLong(cursor.getColumnIndex(KEY_START_TIME)));
-            itinerary.setStopTime(cursor.getLong(cursor.getColumnIndex(KEY_STOP_TIME)));
+            itinerary.setStartTime(cursor.getString(cursor.getColumnIndex(KEY_START_TIME)));
+            itinerary.setStopTime(cursor.getString(cursor.getColumnIndex(KEY_STOP_TIME)));
 
             result.add(itinerary);
         }
@@ -298,7 +298,7 @@ public class DBHelper extends SQLiteOpenHelper {
         marker.setAltitude(cursor.getDouble(cursor.getColumnIndex(KEY_ALTITUDE)));
         marker.setLatitude(cursor.getDouble(cursor.getColumnIndex(KEY_LATITUDE)));
         marker.setLongitude(cursor.getDouble(cursor.getColumnIndex(KEY_LONGITUDE)));
-        marker.setIm(cursor.getLong(cursor.getColumnIndex(KEY_IM)));
+        marker.setIm(cursor.getString(cursor.getColumnIndex(KEY_IM)));
         marker.setDir_dep(cursor.getString(cursor.getColumnIndex(KEY_DIR_DEP)));
         marker.setDrp(cursor.getFloat(cursor.getColumnIndex(KEY_DRP)));
         marker.setVm(cursor.getFloat(cursor.getColumnIndex(KEY_VM)));
@@ -338,7 +338,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 marker.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
                 marker.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
                 marker.setAltitude(c.getDouble(c.getColumnIndex(KEY_ALTITUDE)));
-                marker.setIm(c.getLong(c.getColumnIndex(KEY_IM)));
+                marker.setIm(c.getString(c.getColumnIndex(KEY_IM)));
                 marker.setDir_dep(c.getString(c.getColumnIndex(KEY_DIR_DEP)));
                 marker.setDrp(c.getFloat(c.getColumnIndex(KEY_DRP)));
                 marker.setVm(c.getFloat(c.getColumnIndex(KEY_VM)));

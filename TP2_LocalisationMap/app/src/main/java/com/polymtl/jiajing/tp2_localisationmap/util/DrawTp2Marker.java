@@ -1,14 +1,13 @@
-package com.polymtl.jiajing.tp2_localisationmap.service;
+package com.polymtl.jiajing.tp2_localisationmap.util;
 
 import android.content.Context;
-import android.util.Log;
+
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.polymtl.jiajing.tp2_localisationmap.R;
 import com.polymtl.jiajing.tp2_localisationmap.model.BaseStation;
-import com.polymtl.jiajing.tp2_localisationmap.model.MarkerGPS;
 import com.polymtl.jiajing.tp2_localisationmap.model.Tp2Marker;
 
 /**

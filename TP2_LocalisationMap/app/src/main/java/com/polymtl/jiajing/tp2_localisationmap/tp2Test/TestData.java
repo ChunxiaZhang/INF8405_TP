@@ -41,7 +41,8 @@ public class TestData {
 
         List<Tp2Marker> markers = new ArrayList<>();
 
-        testItinerary.setStartTime(1424924854700l);
+//        testItinerary.setStartTime(1424924854700l);
+        testItinerary.setStartTime("2013-08-08 09:26:32 GMT");
 
         //add some Location objects
         List<Location> locations = new ArrayList<>();
@@ -51,7 +52,8 @@ public class TestData {
         l1.setTime(1424924854700l);
         locations.add(l1);
 
-        testItinerary.setStartTime(1424924854700l);
+//        testItinerary.setStartTime(1424924854700l);
+        testItinerary.setStartTime("2013-08-08 09:26:32 GMT");
         testItinerary.setStopPower(60);
 
         Location l2 = new Location(provider);
@@ -156,7 +158,8 @@ public class TestData {
         l18.setTime(1424925394700l);
         locations.add(l18);
 
-        testItinerary.setStopTime(1424925394700l);
+//        testItinerary.setStopTime(1424925394700l);
+        testItinerary.setStopTime("2013-08-08 09:26:32 GMT");
         testItinerary.setStopPower(50);
 
 

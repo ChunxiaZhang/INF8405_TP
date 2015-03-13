@@ -1,0 +1,74 @@
+<!--<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <SurfaceView
+        android:id="@+id/surfaceViewImgCap"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/btnGameStart"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Take Picture"/>
+
+</LinearLayout>-->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:background="@android:color/darker_gray"
+tools:context=".MapsActivity" >
+
+<FrameLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@android:color/darker_gray">
+
+    <SurfaceView
+        android:id="@+id/surfaceViewImgCap"
+        android:layout_width="0dip"
+        android:layout_height="0dip" />
+</FrameLayout>
+
+<TableLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:layout_centerHorizontal="true">
+
+    <TableRow>
+        <ImageButton
+            android:id="@+id/btn_imgsave"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/btn_ok_background"
+            android:layout_marginBottom="2dip"
+            android:visibility="gone"
+            android:clickable="false"/>
+
+        <ImageButton
+            android:id="@+id/btn_imgcapture"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/btn_imgcapture_background"
+            android:layout_marginBottom="2dip"/>
+
+        <ImageButton
+            android:id="@+id/btn_imgcancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/btn_cancel_background"
+            android:layout_marginBottom="2dip"
+            android:visibility="gone"
+            android:clickable="false"/>
+    </TableRow>
+
+</TableLayout>
+
+
+
+</RelativeLayout>

@@ -11,8 +11,11 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
 import java.sql.Time;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 /**
  * Created by Jiajing on 2015/2/20.
@@ -26,7 +29,8 @@ public class Tp2Marker implements ConnectInfo {
     private double longitude;
     private double altitude;
 
-    private long Im; // the UTC time of this fix, in milliseconds since January 1, 1970.
+//    private long Im; // the UTC time of this fix, in milliseconds since January 1, 1970.
+    private String Im;
 
     private String Dir_dep; //direction
 
@@ -46,6 +50,8 @@ public class Tp2Marker implements ConnectInfo {
     private Geocoder geocoder;
     private String address;
 
+    private String picturePath;
+
     public Tp2Marker() {};
 
     public Tp2Marker(Location location, Context context) {
@@ -60,11 +66,16 @@ public class Tp2Marker implements ConnectInfo {
             this.altitude = location.getAltitude();
         }
 
-        this.Im = location.getTime();
+//        this.Im = location.getTime();
+        SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
+        sdfDate.setTimeZone(TimeZone.getDefault());
+        Date now = new Date();
+        this.Im = sdfDate.format(now);
 
         this.Mod_loc =  location.getProvider();
 
         this.geocoder = new Geocoder(context);
+        this.picturePath = null;
     }
 
     public int getId() {
@@ -103,10 +114,10 @@ public class Tp2Marker implements ConnectInfo {
         this.longitude = longitude;
     }
 
-    public long getIm() {
+    public String getIm() {
         return this.Im;
     }
-    public void setIm(long im) {
+    public void setIm(String im) {
         this.Im = im;
     }
 
@@ -193,4 +204,8 @@ public class Tp2Marker implements ConnectInfo {
         this.info = info;
     }
 
+    public String getPicturePath() { return this.picturePath; }
+    public void setPicturePath(String picturePath){
+        this.picturePath = picturePath;
+    }
 }

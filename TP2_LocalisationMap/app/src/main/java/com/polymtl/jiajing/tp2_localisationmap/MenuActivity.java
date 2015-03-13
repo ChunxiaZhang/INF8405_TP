@@ -20,7 +20,7 @@ import android.widget.TextView;
 import com.polymtl.jiajing.tp2_localisationmap.model.ConnectMode;
 import com.polymtl.jiajing.tp2_localisationmap.model.Frequency;
 import com.polymtl.jiajing.tp2_localisationmap.model.ZoomLevel;
-import com.polymtl.jiajing.tp2_localisationmap.service.DetectConnectivity;
+import com.polymtl.jiajing.tp2_localisationmap.util.DetectConnectivity;
 
 
 public class MenuActivity extends ActionBarActivity {
