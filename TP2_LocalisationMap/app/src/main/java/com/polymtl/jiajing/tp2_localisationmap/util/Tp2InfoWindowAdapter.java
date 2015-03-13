@@ -11,6 +11,10 @@ import com.google.android.gms.maps.GoogleMap;
 import com.polymtl.jiajing.tp2_localisationmap.R;
 import com.polymtl.jiajing.tp2_localisationmap.model.Tp2Marker;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
+
 /**
  * Created by Zoe on 15-02-27.
  */
@@ -43,7 +47,11 @@ public class Tp2InfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
 
         TextView title = (TextView) v.findViewById(R.id.title);
 
-        title.setText(timeFromUTCSecs(context, tp2Marker.getIm()));//set tile with time
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss z");
+        sdf.setTimeZone(TimeZone.getDefault());
+        Date now = new Date(tp2Marker.getIm());
+        String strDate = sdf.format(now);
+        title.setText(strDate);//set tile with time
 
         TextView info = (TextView) v.findViewById(R.id.info);
 
@@ -66,11 +74,11 @@ public class Tp2InfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
         return info;
     }
 
-    public static String timeFromUTCSecs(Context ctx, long secs) {
-        return DateUtils.formatDateTime(ctx, secs * 1000,
-                DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE
-                        | DateUtils.FORMAT_NUMERIC_DATE);
-    }
+//    public static String timeFromUTCSecs(Context ctx, long secs) {
+//        return DateUtils.formatDateTime(ctx, secs * 1000,
+//                DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE
+//                        | DateUtils.FORMAT_NUMERIC_DATE);
+//    }
 
 
     /*private String getDate(String dateString) {

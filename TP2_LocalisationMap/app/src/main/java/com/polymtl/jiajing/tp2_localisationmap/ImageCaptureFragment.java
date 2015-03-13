@@ -30,10 +30,8 @@ import java.util.List;
 public class ImageCaptureFragment extends DialogFragment{
     private static String TAG = "ImageCaptureFragment";
     private int idMaker = -1;
-    private Camera myCamera;
     private SurfaceView surfaceViewImgCapture;
     private SurfaceHolder surfaceHolder;
-    boolean previewing = false;
     private ImageButton btnImgCapture;
     private ImageButton btnImgSave;
     private ImageButton btnImgCancel;
@@ -44,40 +42,11 @@ public class ImageCaptureFragment extends DialogFragment{
 
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
-//            Log.i(TAG,"Surface Created");
-//            myCamera = Camera.open();
-//
-//            try {
-//                myCamera.setDisplayOrientation(90);
-//                myCamera.setPreviewDisplay(holder);
-//            } catch (IOException e) {
-//                myCamera.release();
-//                myCamera = null;
-//                previewing = false;
-//                e.printStackTrace();
-//            }
             CameraOperations.getInstance().doOpenCamera();
         }
 
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-//            if(previewing){
-//                myCamera.stopPreview();
-//                previewing = false;
-//            }
-//            Camera.Parameters parameters = myCamera.getParameters();
-//            parameters.setPictureFormat(PixelFormat.JPEG);
-//
-//            List<Camera.Size> previewSizes = parameters.getSupportedPreviewSizes();
-//
-//            parameters.setPreviewSize(640,480);
-//            parameters.setFocusMode("auto");
-//            parameters.setPictureSize(640,480);
-//
-//            surfaceViewImgCapture.setLayoutParams(new LinearLayout.LayoutParams(640,480));
-//
-//            myCamera.startPreview();
-//            previewing = true;
             CameraOperations.getInstance().doStartPreview(surfaceHolder,previewRate);
         }
 
