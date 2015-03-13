@@ -43,7 +43,7 @@ public class Tp2InfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
 
         TextView title = (TextView) v.findViewById(R.id.title);
 
-        title.setText(tp2Marker.getIm());//set tile with time
+        title.setText(timeFromUTCSecs(context, tp2Marker.getIm()));//set tile with time
 
         TextView info = (TextView) v.findViewById(R.id.info);
 

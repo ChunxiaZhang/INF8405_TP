@@ -14,7 +14,7 @@ public class Itinerary {
     //private List<Tp2Marker> tp2Markers; //???if it is necessary
     private int Nbr_sb; // count of base stations
     private float startPower, stopPower, allPowerConsumption;
-    private String startTime, stopTime;
+    private long startTime, stopTime;
 
     public Itinerary() {
 
@@ -31,19 +31,19 @@ public class Itinerary {
         this.id = id;
     }
 
-    public String getStartTime() {
+    public long getStartTime() {
         //this.startTime = this.tp2Markers.get(0).getIm();
         return this.startTime;
     }
 
-    public void setStartTime(String time) {
+    public void setStartTime(long time) {
         this.startTime = time;
     }
 
-    public void setStopTime(String time) {
+    public void setStopTime(long time) {
         this.stopTime = time;
     }
-    public String getStopTime() {
+    public long getStopTime() {
         //this.stopTime = this.tp2Markers.get(tp2Markers.size()-1).getIm();
         return this.stopTime;
     }

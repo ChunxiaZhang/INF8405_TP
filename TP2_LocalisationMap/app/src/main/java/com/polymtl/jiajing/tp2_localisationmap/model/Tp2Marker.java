@@ -11,11 +11,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
 import java.sql.Time;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
 /**
  * Created by Jiajing on 2015/2/20.
@@ -29,8 +26,7 @@ public class Tp2Marker implements ConnectInfo {
     private double longitude;
     private double altitude;
 
-//    private long Im; // the UTC time of this fix, in milliseconds since January 1, 1970.
-    private String Im;
+    private long Im; // the UTC time of this fix, in milliseconds since January 1, 1970.
 
     private String Dir_dep; //direction
 
@@ -66,11 +62,7 @@ public class Tp2Marker implements ConnectInfo {
             this.altitude = location.getAltitude();
         }
 
-//        this.Im = location.getTime();
-        SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-        sdfDate.setTimeZone(TimeZone.getDefault());
-        Date now = new Date();
-        this.Im = sdfDate.format(now);
+        this.Im = location.getTime();
 
         this.Mod_loc =  location.getProvider();
 
@@ -114,10 +106,10 @@ public class Tp2Marker implements ConnectInfo {
         this.longitude = longitude;
     }
 
-    public String getIm() {
+    public long getIm() {
         return this.Im;
     }
-    public void setIm(String im) {
+    public void setIm(long im) {
         this.Im = im;
     }
 
