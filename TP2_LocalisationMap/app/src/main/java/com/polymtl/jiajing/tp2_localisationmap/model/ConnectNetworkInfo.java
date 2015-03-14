@@ -22,7 +22,7 @@ import com.google.android.gms.maps.model.LatLng;
 /**
  * Created by Zoe on 15-02-23.
  */
-public class ConnectNetworkInfo implements ConnectInfo {
+public class ConnectNetworkInfo {
 
     private Context context;
     private TelephonyManager telephonyManager;
@@ -153,6 +153,14 @@ public class ConnectNetworkInfo implements ConnectInfo {
     }
 
     public int getNiv_sig_sb() {
+        return this.Niv_sig_sb;
+    }
+
+    public void setNiv_sig_sb(int level) {
+        this.Niv_sig_sb = level;
+    }
+
+   /* public int getNiv_sig_sb() {
         for (CellInfo cellInfo : telephonyManager.getAllCellInfo()) {
             if (cellInfo instanceof CellInfoCdma) {
                 final CellSignalStrengthCdma cellSignalStrengthCdma = ((CellInfoCdma) cellInfo).getCellSignalStrength();
@@ -173,7 +181,7 @@ public class ConnectNetworkInfo implements ConnectInfo {
 
         }
         return this.Niv_sig_sb;
-    }
+    }*/
 
     public int getCell_ID() {
 
@@ -195,7 +203,6 @@ public class ConnectNetworkInfo implements ConnectInfo {
 
 
     //What's the format  ????????????????
-    @Override
     public String getInfo() {
         String info = "";
         info += "Type_R:" + getPhoneType();

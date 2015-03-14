@@ -11,22 +11,28 @@ public class ConnectGPSInfo implements ConnectInfo {
     private Context context;
     private String GPSInfo;
 
-    public ConnectGPSInfo(Context context) {
+   /* public ConnectGPSInfo(Context context) {
         this.context = context;
+    }*/
+
+    public void setGPSInfo(String info) {
+        GPSInfo = info;
     }
 
     @Override
     public String getInfo() {
 
-        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        /*WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
         if (!wifiManager.isWifiEnabled() || wifiInfo.getBSSID() == null) {
             return null;
         } else {
             this.GPSInfo = "PA_Wifi(" + wifiInfo.getSSID() + ", " + wifiInfo.getRssi()
                     + ", " + wifiInfo.getBSSID() + ")";
-        }
+        }*/
 
         return this.GPSInfo;
     }
+
+
 }

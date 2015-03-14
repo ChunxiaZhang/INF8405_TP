@@ -170,7 +170,7 @@ public class TestData {
             Location ltemp = i.next();
             Log.i("test:", "ltemp " + ltemp.getLatitude() + "," + ltemp.getLongitude());
             //if (provider == LocationManager.GPS_PROVIDER) {
-            info = new ConnectGPSInfo(context);
+            info = new ConnectGPSInfo();
             p = new MarkerGPS(ltemp,context,(ConnectGPSInfo)info);
             //} else {
             //  info = new ConnectNetworkInfo(context);
@@ -179,7 +179,7 @@ public class TestData {
 
             p.setLocation(ltemp);
             p.setNiv_batt(lb);
-            p.setInfo(new ConnectGPSInfo(context).getInfo());
+            p.setInfo(new ConnectGPSInfo().getInfo());
             p.setMod_loc(provider);
             lb = lb - 1; // level battery
 

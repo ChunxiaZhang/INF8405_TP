@@ -9,7 +9,7 @@ public class Frequency {
 
     public Frequency() {
 
-        this.time = 30; //Initial 30s
+        this.time = 2*60; //Initial 30s
     }
 
     public int getFrequency() {

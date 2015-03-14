@@ -5,6 +5,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
+import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -17,7 +18,7 @@ import java.util.List;
 /**
  * Created by Jiajing on 2015/2/20.
  */
-public class Tp2Marker implements ConnectInfo {
+public class Tp2Marker {
 
     private int id;
     private int itineraryId;
@@ -63,6 +64,7 @@ public class Tp2Marker implements ConnectInfo {
         }
 
         this.Im = location.getTime();
+        Log.i("marker location time", "" + this.Im);
 
         this.Mod_loc =  location.getProvider();
 
@@ -105,6 +107,7 @@ public class Tp2Marker implements ConnectInfo {
     public void setLongitude(double longitude) {
         this.longitude = longitude;
     }
+
 
     public long getIm() {
         return this.Im;
@@ -187,9 +190,10 @@ public class Tp2Marker implements ConnectInfo {
     }
 
 
-    @Override
+
     public String getInfo() {
-        return null;
+
+        return this.info;
     }
 
     public void setInfo(String info) {

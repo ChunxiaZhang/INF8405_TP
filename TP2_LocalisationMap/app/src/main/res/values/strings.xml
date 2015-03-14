@@ -12,7 +12,7 @@
     <string name="network">Mobile network</string>
     <string name="zoom">Zoom</string>
     <string name="start">Start</string>
-    <string name="itineraryHistory">Last  3 Itineraries</string>
+    <string name="itineraryHistory">History</string>
     <string name="exit">Exit</string>
     <string name="openmap">Open Map</string>
 

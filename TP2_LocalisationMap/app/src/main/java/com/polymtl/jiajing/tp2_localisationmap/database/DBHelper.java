@@ -123,6 +123,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         SQLiteDatabase db = this.getWritableDatabase();
 
+
         ContentValues values = new ContentValues();
 
         values.put(KEY_DT, itinerary.getDt());
@@ -133,6 +134,7 @@ public class DBHelper extends SQLiteOpenHelper {
         values.put(KEY_POWER_CONSUMPTION, itinerary.getAllPowerConsumption());
 
         //insert row
+        Log.i(LOG, "insert row");
         long itinerary_id = db.insert(TABLE_ITINERARY, null, values);
 
         db.close();
@@ -176,8 +178,15 @@ public class DBHelper extends SQLiteOpenHelper {
 
     //Get all itineraries
     public List<Itinerary> getAllItineraries() {
+        Log.i(LOG, "start getAllItineraries");
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_ITINERARY + " ORDER BY time DESC LIMIT 3", null);
+        Log.i(LOG, "start read database");
+
+        Cursor cursor = db.rawQuery("SELECT * FROM "+TABLE_ITINERARY+" ORDER BY start_time DESC LIMIT 3", null);
+        //Cursor cursor = db.query(TABLE_ITINERARY, null, null, null, null, null, null);
+
+        Log.i(LOG, "count of row " + cursor.getCount());
+
         List<Itinerary> result = new ArrayList<>();
         while ((cursor.moveToNext())) {
 
@@ -186,6 +195,7 @@ public class DBHelper extends SQLiteOpenHelper {
             itinerary.setAllPowerConsumption(cursor.getFloat(cursor.getColumnIndex(KEY_POWER_CONSUMPTION)));
             itinerary.setNbr_sb(cursor.getInt(cursor.getColumnIndex(KEY_NBR_SB)));
             itinerary.setStartTime(cursor.getLong(cursor.getColumnIndex(KEY_START_TIME)));
+            Log.i(LOG, "start"+cursor.getLong(cursor.getColumnIndex(KEY_START_TIME)));
             itinerary.setStopTime(cursor.getLong(cursor.getColumnIndex(KEY_STOP_TIME)));
 
             result.add(itinerary);
@@ -369,7 +379,7 @@ public class DBHelper extends SQLiteOpenHelper {
             deleteMarker(marker.getId());
         }
 
-        //get all markers under this itinerary
+        //get all stations under this itinerary
         List<BaseStation> stations = getStationsOfItinerary(time);
         //delete all these stations
         for (BaseStation station : stations) {

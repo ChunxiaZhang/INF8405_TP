@@ -60,7 +60,7 @@ public class MenuActivity extends ActionBarActivity {
         seekBarFrequency = (SeekBar) findViewById(R.id.seekBarFrequency);
 
         textViewZoom.setText("Zoom: " + seekBarZoom.getProgress());
-        textViewFrequency.setText("Frequency: " + seekBarFrequency.getProgress() + "s");
+        textViewFrequency.setText("Frequency: " + (seekBarFrequency.getProgress()+1) + "m");
 
 
         radioGroupMode.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
@@ -85,8 +85,8 @@ public class MenuActivity extends ActionBarActivity {
         seekBarFrequency.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                frequency.setTime(seekBarFrequency.getProgress());
-                textViewFrequency.setText("Frequency:" + seekBarFrequency.getProgress() + "s");
+                frequency.setTime((seekBarFrequency.getProgress() + 1) * 60); //the minimum is 1 minute, maximum is 15 minutes
+                textViewFrequency.setText("Frequency:" + (seekBarFrequency.getProgress() + 1) + "m");
             }
 
             @Override
@@ -142,19 +142,28 @@ public class MenuActivity extends ActionBarActivity {
                             }).setNegativeButton(R.string.ignore, null).show();
 
                 } else {
-                    openMapsActivity();
+                    openMapsActivity(false);
                 }
 
             }
         });
 
+        buttonItineraryHistory.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                openMapsActivity(true);
+            }
+        });
+
     }
 
-    private void openMapsActivity() {
+    private void openMapsActivity(Boolean withHistory) {
         Intent i = new Intent(MenuActivity.this, MapsActivity.class);
         i.putExtra("connectMode", mode.getProvider());
         i.putExtra("frequency", frequency.getFrequency());
         i.putExtra("zoom", zoomLevel.getZoomLevel());
+        i.putExtra("withHistory", withHistory);
         startActivity(i); //Send two players' name to GameActivity
     }
 

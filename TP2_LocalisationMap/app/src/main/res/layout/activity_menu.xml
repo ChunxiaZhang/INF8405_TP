@@ -67,8 +67,8 @@
             android:layout_marginRight="40dp"
 
             android:layout_weight="2"
-            android:max="300"
-            android:progress="30" />
+            android:max="14"
+            android:progress="1" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -105,7 +105,7 @@
         <Button
             android:layout_width="fill_parent"
             android:layout_height="50dp"
-            android:id="@+id/btnExit"
+            android:id="@+id/btnItineraryHistory"
             android:text="@string/itineraryHistory"
             android:layout_marginTop="20dp"
             android:layout_marginBottom="20dp"
@@ -116,7 +116,7 @@
         <Button
             android:layout_width="fill_parent"
             android:layout_height="50dp"
-            android:id="@+id/btnItineraryHistory"
+            android:id="@+id/btnExit"
             android:text="@string/exit"
             android:layout_marginTop="20dp"
             android:layout_marginBottom="20dp"

@@ -15,13 +15,24 @@ import java.util.List;
  */
 public class AdjustCamera {
 
+    public static LatLngBounds.Builder bc;
     //Show all the points in the map
-    public static void fixZoom(GoogleMap mMap, List<LatLng> points) {
-        LatLngBounds.Builder bc = new LatLngBounds.Builder();
+    public static void fixZoom(final GoogleMap mMap, List<LatLng> points) {
+        bc = new LatLngBounds.Builder();
         for (LatLng item : points) {
             bc.include(item);
         }
-        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bc.build(), 50));
+        try {
+            mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bc.build(), 50));
+        } catch (IllegalStateException ise) {
+            mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+                @Override
+                public void onMapLoaded() {
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bc.build(), 50));
+                }
+            });
+        }
+
     }
 
     public static void moveCamera(GoogleMap mMap, LatLng latLng, int zoomLevel) {
