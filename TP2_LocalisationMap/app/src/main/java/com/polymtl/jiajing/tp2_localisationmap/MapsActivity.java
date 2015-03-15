@@ -90,17 +90,13 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
     private String addressTo, addressFrom;
     private LatLng fromLatLng, toLatLng;
 
-   // private FusedLocationProviderApi fusedLocationProviderApi = LocationServices.FusedLocationApi;//test
-    //private GoogleApiClient googleApiClient;
-
-
     TelephonyManager telephonyManager;
     PhoneStateListener phoneStateListener;
 
     private LocationManager locationManager;
     private BroadcastReceiver broadcastReceiver;
     private WifiManager wifiManager;
-    private Location location;
+    private Location currentLocation;
     private String provider;
 
     //private ConnectInfo connectInfo;
@@ -115,7 +111,7 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
     final Tp2LocationListener tp2Locationlistener = new Tp2LocationListener();
 
     private Itinerary thisItinerary;
-    long itinerary_id;
+    private long itinerary_id;
     private Itinerary testItinerary; //used for testing
 
 
@@ -144,7 +140,6 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
         zoomLevel.setZoomLevel(getIntent().getIntExtra("zoom", zoomLevel.getZoomLevel()));
         frequency.setTime(getIntent().getIntExtra("frequency", frequency.getFrequency()));
         withHistory = getIntent().getBooleanExtra("withHistory", false);
-        Log.i("withHistory", "" + withHistory);
 
         isOpenTracking = false;
 
@@ -209,8 +204,9 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
             if (dbHelper.getAllItineraries().size() <= 0) {
                 Toast.makeText(MapsActivity.this, "There is no itinerary history.",
                         Toast.LENGTH_LONG).show();
+            } else {
+                DrawItinerary.drawAllItineraries(MapsActivity.this, mMap, dbHelper);
             }
-            DrawItinerary.drawAllItineraries(MapsActivity.this, mMap, dbHelper);
 
         } else {
 
@@ -227,13 +223,13 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
                 return;
             }
 
-            location = locationManager.getLastKnownLocation(provider);
-            if (location == null) {
+            currentLocation = locationManager.getLastKnownLocation(provider);
+            if (currentLocation == null) {
                 Log.i("setUpMap:", "location is null");
                 return;
             }
 
-            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+            LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
             DrawTp2Marker.setTp2Marker(mMap, latLng);
             AdjustCamera.moveCamera(mMap, latLng, zoomLevel.getZoomLevel());
 
@@ -241,6 +237,67 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
 
     }
 
+    public void setCurrentLocation(Location location) {
+        this.currentLocation = location;
+    }
+
+    public void setCurrentMarker(Tp2Marker marker) {
+        this.currentMarker = marker;
+    }
+
+    private final class Tp2LocationListener implements LocationListener {
+        //Called when the location has changed.
+        @Override
+        public void onLocationChanged(Location location) {
+
+            Log.i("LocationListener: ", "Location changed");
+
+            Toast.makeText(MapsActivity.this, "Location changed",
+                    Toast.LENGTH_LONG).show();
+
+
+            setCurrentLocation(location);
+
+            Tp2Marker tp2Marker = new Tp2Marker(location, MapsActivity.this);
+
+            setCurrentMarker(tp2Marker);
+
+            setConnectInfo();
+
+            initialCurrentMarker();
+            Log.i("Set marker ", "initialCurrentMarker");
+            updateToNewLocation();
+            Log.i("Set marker ", "updateToNewLocation");
+            alertOpenCamera();
+
+        }
+
+        //Called when the provider status changes.
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+            Log.i("onStatusChanged:", "onStatusChanged");
+            switch (status) {
+                case LocationProvider.AVAILABLE:
+                case LocationProvider.TEMPORARILY_UNAVAILABLE:
+                case LocationProvider.OUT_OF_SERVICE:
+                    break;
+            }
+        }
+
+        //Called when the provider is enabled by the user.
+        @Override
+        public void onProviderEnabled(String provider) {
+            Log.i("LocationListener: ", provider + ": Provider Enabled");
+            //location = locationManager.getLastKnownLocation(provider);
+        }
+
+        //Called when the provider is disabled by the user.
+        @Override
+        public void onProviderDisabled(String provider) {
+            Log.i("LocationListener: ", provider + ": Provider Disabled");
+            //updateToNewLocation(null);
+        }
+    }
 
     private void setConnectInfo() {
 
@@ -285,7 +342,6 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
 
     private void initialCurrentMarker() {
 
-        currentMarker = new Tp2Marker(location, MapsActivity.this);
         if (markers.size() > 0) {
             BetweenMarkers betweenMarkers = new BetweenMarkers(markers.get(markers.size()-1), currentMarker);
             currentMarker.setDir_dep(betweenMarkers.getStringDir_dep());
@@ -299,9 +355,9 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
         //set id of the marker
         currentMarker.setId(markers.size());
 
-
         //add Tp2Marker
         markers.add(currentMarker);
+        Log.i("Markers number", ""+markers.size());
 
     }
 
@@ -328,10 +384,10 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
     }
 
     private void updateToNewLocation() {
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
 
         //draw current marker
-        DrawTp2Marker.setTp2Marker(MapsActivity.this, mMap, currentMarker);
+        DrawTp2Marker.setTp2Marker(MapsActivity.this, mMap, currentMarker, markers);
 
         AdjustCamera.moveCamera(mMap, latLng, zoomLevel.getZoomLevel());
 
@@ -343,8 +399,12 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
      */
     @Override
     public void pictureTaken(String picturePath) {
-        markers.get(markers.size()-1).setPicturePath(picturePath);
+        //markers.get(markers.size()-1).setPicturePath(picturePath);
         //TODO set pictures for windows adapter
+        if (picturePath != null) {
+            currentMarker.setPicturePath(picturePath);
+            Log.i("setPicturePath", picturePath);
+        }
     }
 
     private void setUpButtons() {
@@ -369,6 +429,7 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
             public void onClick(View v) {
                 if(isOpenTracking) { //stop tracking
                     locationManager.removeUpdates(tp2Locationlistener);
+
                     telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
 
                     btn_start_stop.setBackground(getResources().getDrawable(R.drawable.start));
@@ -376,7 +437,6 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
 
                     //set thisItinerary
                     thisItinerary.setStartTime(markers.get(0).getIm());
-                    Log.i("save start time", " " + markers.get(0).getIm());
                     thisItinerary.setStartPower(markers.get(0).getNiv_batt());
 
                     thisItinerary.setStopTime(markers.get(markers.size()-1).getIm());
@@ -392,28 +452,21 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
                         dbHelper.createMarker(marker, itinerary_id);
                     }
 
+
                     for (BaseStation station: stations) {
                         dbHelper.createStation(station, itinerary_id);
                     }
 
-                    Log.i("after start time", "" + dbHelper.getItinerary(markers.get(0).getIm()).getStartTime());
                     //Show all markers in the map and information about this itinerary
                     DrawItinerary.drawCurrentItinerary(MapsActivity.this, mMap, thisItinerary, dbHelper);
+
                     //Show all base stations
                     //TODO
 
                 } else { //start tracking
                     //clear the map
                     mMap.clear();
-
-                    markers = new ArrayList<>();
-                    stations = new ArrayList<>();
-
-                    thisItinerary = new Itinerary();//initial this itinerary
-
-                    //add the first marker
-                    if(location == null) {
-                        Log.i("Start tracking:", "location can't be fined");
+                    if(currentLocation == null) { //if not no location, add the default marker
                         Toast.makeText(MapsActivity.this, "Cannot get location, please make sure there is location serveice.",
                                 Toast.LENGTH_LONG).show();
 
@@ -424,8 +477,13 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
                         return;
                     }
 
+                    markers = new ArrayList<>();
+                    stations = new ArrayList<>();
+
+                    thisItinerary = new Itinerary();//initial this itinerary
+
                     //create the first marker
-                    currentMarker = new Tp2Marker(location, context);
+                    currentMarker = new Tp2Marker(currentLocation, context);
 
                     //set id of the marker, the id from 0
                     currentMarker.setId(markers.size());
@@ -435,17 +493,19 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
 
                     //draw the first current marker
                     //DrawTp2Marker.setTp2Marker(MapsActivity.this, mMap, currentMarker);
-                    DrawTp2Marker.setTp2Marker(mMap, new LatLng(location.getLatitude(), location.getLongitude()));
+                    DrawTp2Marker.setTp2Marker(mMap, new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()));
 
                     //request listening location changed
                     //minDistance is 10 metres
-                    Log.i("frequency", "" + frequency.getFrequency());
                     locationManager.requestLocationUpdates(provider, frequency.getFrequency(), 10, tp2Locationlistener);
+
                     btn_start_stop.setBackground(getResources().getDrawable(R.drawable.stop));
                     isOpenTracking = true;
 
+
                     //start listening cell location changed
                     if (provider == LocationManager.NETWORK_PROVIDER) {
+                        Log.i("provider", "NETWORK_PROVIDER");
                         setUpPhoneStateListener();
                     }
 
@@ -483,113 +543,9 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
 
     }
 
-    private final class Tp2LocationListener implements LocationListener {
-        //Called when the location has changed.
-        @Override
-        public void onLocationChanged(Location location) {
-            Log.i("LocationListener: ", "Location changed");
-            setConnectInfo();
-            initialCurrentMarker();
-            updateToNewLocation();
-            alertOpenCamera();
 
 
-            //For Test
-            BaseStation bs = new BaseStation();
-            if (getGsmCellLocation() != null) {
-                bs.setLatitude(getGsmCellLocation().latitude);
-                bs.setLongitude(getGsmCellLocation().longitude);
-                DrawTp2Marker.setStationMarker(MapsActivity.this, mMap, bs);
-            }
-            //need to add marker in database
-            //??????????????????????
-        }
 
-        //Called when the provider status changes.
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-            Log.i("onStatusChanged:", "onStatusChanged");
-            switch (status) {
-                case LocationProvider.AVAILABLE:
-                case LocationProvider.TEMPORARILY_UNAVAILABLE:
-                case LocationProvider.OUT_OF_SERVICE:
-                    break;
-            }
-        }
-
-        //Called when the provider is enabled by the user.
-        @Override
-        public void onProviderEnabled(String provider) {
-            Log.i("LocationListener: ", provider + ": Provider Enabled");
-            //location = locationManager.getLastKnownLocation(provider);
-        }
-
-        //Called when the provider is disabled by the user.
-        @Override
-        public void onProviderDisabled(String provider) {
-            Log.i("LocationListener: ", provider + ": Provider Disabled");
-            //updateToNewLocation(null);
-        }
-    }
-
-
-    //set up base station changed listener
-    public void setUpPhoneStateListener() {
-
-        Log.i("setUpPhoneStateListener","start");
-        phoneStateListener = new PhoneStateListener() {
-            //Cell location changed listener
-            @Override
-            public void onCellLocationChanged(CellLocation cellLocation) {
-                Log.i("setUpPhoneStateListener","cellLocation change");
-                //number station increase
-                thisItinerary.increaseNbr_sb();
-
-                BaseStation station = new BaseStation();
-                if (cellLocation instanceof GsmCellLocation) {
-                    Log.i("setUpPhoneStateListener","gsm");
-                    if (getGsmCellLocation() != null) {
-                        Log.i("setUpPhoneStateListener","not null");
-                        station.setLatitude(getGsmCellLocation().latitude);
-
-                        station.setLongitude(getGsmCellLocation().longitude);
-                        Log.i("station location", ""+getGsmCellLocation().latitude+getGsmCellLocation().longitude);
-                    } else {
-                        Log.i("setUpPhoneStateListener","null");
-                    }
-                }
-                if (cellLocation instanceof CdmaCellLocation) {
-                    Log.i("setUpPhoneStateListener","cdma");
-                    CdmaCellLocation cdmaCellLocation = (CdmaCellLocation) cellLocation;
-                    if (cdmaCellLocation != null) {
-                        station.setLatitude(cdmaCellLocation.getBaseStationLatitude());
-                        station.setLongitude(cdmaCellLocation.getBaseStationLongitude());
-                    }
-                }
-
-                //Draw station marker
-                DrawTp2Marker.setStationMarker(MapsActivity.this, mMap, station);
-                //add station to list
-                stations.add(station);
-
-                //save station to database
-            }
-
-            @Override
-            public void onSignalStrengthsChanged(SignalStrength signalStrength) {
-
-                if (signalStrength.isGsm()) {
-                    cellSignalLevel = signalStrength.getGsmSignalStrength();
-                } else if (signalStrength.getCdmaDbm() > 0) {
-                    cellSignalLevel = signalStrength.getCdmaDbm();
-                } else {
-                    cellSignalLevel = signalStrength.getEvdoDbm();
-                }
-
-            }
-        };
-        telephonyManager.listen(phoneStateListener, LISTEN_CELL_LOCATION | PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
-    }
 
     @Override
     public void onBackPressed() {
@@ -727,11 +683,16 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
         GsmCellLocation gsmCellLocation = (GsmCellLocation)telephonyManager.getCellLocation();
 
         String networkOperator = telephonyManager.getNetworkOperator();
+        Log.i("networkOperator",networkOperator);
         String mcc = networkOperator.substring(0, 3);
+        Log.i("getGsmCellLocation mcc",mcc);
         String mnc = networkOperator.substring(3);
+        Log.i("getGsmCellLocation mnc",mnc);
 
         int cid = gsmCellLocation.getCid();
+        Log.i("getGsmCellLocation cid", "" +cid);
         int lac = gsmCellLocation.getLac();
+        Log.i("getGsmCellLocation lac", "" +lac);
         GetGsmCellLocation getLocation = new GetGsmCellLocation();
         getLocation.setMcc(mcc);
         getLocation.setMnc(mnc);
@@ -822,6 +783,66 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
             points.add(p.getLatLng());
         }
         AdjustCamera.fixZoom(mMap, points);
+    }
+
+
+
+    //set up base station changed listener
+    public void setUpPhoneStateListener() {
+
+        Log.i("setUpPhoneStateListener","start");
+        phoneStateListener = new PhoneStateListener() {
+            //Cell location changed listener
+            @Override
+            public void onCellLocationChanged(CellLocation cellLocation) {
+                Log.i("setUpPhoneStateListener","cellLocation change");
+                //number station increase
+                thisItinerary.increaseNbr_sb();
+
+                BaseStation station = new BaseStation();
+                if (cellLocation instanceof GsmCellLocation) {
+                    Log.i("setUpPhoneStateListener","gsm");
+                    if (getGsmCellLocation() != null) {
+                        Log.i("setUpPhoneStateListener","not null");
+                        station.setLatitude(getGsmCellLocation().latitude);
+
+                        station.setLongitude(getGsmCellLocation().longitude);
+                        Log.i("station location", ""+getGsmCellLocation().latitude+getGsmCellLocation().longitude);
+                    } else {
+                        Log.i("setUpPhoneStateListener","null");
+                    }
+                }
+                if (cellLocation instanceof CdmaCellLocation) {
+                    Log.i("setUpPhoneStateListener","cdma");
+                    CdmaCellLocation cdmaCellLocation = (CdmaCellLocation) cellLocation;
+                    if (cdmaCellLocation != null) {
+                        station.setLatitude(cdmaCellLocation.getBaseStationLatitude());
+                        station.setLongitude(cdmaCellLocation.getBaseStationLongitude());
+                    }
+                }
+
+                //Draw station marker
+                DrawTp2Marker.setStationMarker(MapsActivity.this, mMap, station);
+                //add station to list
+                stations.add(station);
+
+                //save station to database
+            }
+
+            @Override
+            public void onSignalStrengthsChanged(SignalStrength signalStrength) {
+
+                if (signalStrength.isGsm()) {
+                    cellSignalLevel = signalStrength.getGsmSignalStrength();
+                } else if (signalStrength.getCdmaDbm() > 0) {
+                    cellSignalLevel = signalStrength.getCdmaDbm();
+                } else {
+                    cellSignalLevel = signalStrength.getEvdoDbm();
+                }
+
+            }
+        };
+        telephonyManager.listen(phoneStateListener, LISTEN_CELL_LOCATION | PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
     }
 
 }

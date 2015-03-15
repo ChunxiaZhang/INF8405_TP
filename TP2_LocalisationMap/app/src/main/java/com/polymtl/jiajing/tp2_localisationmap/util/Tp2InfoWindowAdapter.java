@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.text.format.DateUtils;
@@ -21,6 +22,7 @@ import com.polymtl.jiajing.tp2_localisationmap.model.Tp2Marker;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 
 import javax.security.auth.callback.Callback;
@@ -34,9 +36,13 @@ public class Tp2InfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
 
     private ContentResolver cr;
 
-    public Tp2InfoWindowAdapter (Context context) {
+    private List<Tp2Marker> markers;
+
+    public Tp2InfoWindowAdapter (Context context, List<Tp2Marker> markers) {
 
         this.context = context;
+
+        this.markers = markers;
 
     }
 
@@ -59,25 +65,31 @@ public class Tp2InfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
         ImageView imageView = (ImageView) v.findViewById(R.id.picture);
         imageView.setImageResource(R.drawable.picture);
 
-        /*TextView title = (TextView) v.findViewById(R.id.title);
+        TextView title = (TextView) v.findViewById(R.id.title);
 
-        title.setText(marker.getTitle());*/
+        title.setText("Marker " + marker.getTitle());
 
         TextView info = (TextView) v.findViewById(R.id.info);
 
         info.setText(marker.getSnippet()); //Show maker information
 
-        //TODO load image
-        //load the image thumbnail
-       /* if (marker.getTitle().length() > 0) {
-            Bitmap bitmap = getBitmap(cr, marker.getTitle());
-            imageView.setImageBitmap(bitmap);
-        }*/
+        if (marker.getTitle() != null) {
+            Tp2Marker tp2Marker = markers.get(Integer.parseInt(marker.getTitle()));
+            try {
+                Bitmap bitmap = decodeSampledBitmapFromFile(tp2Marker.getPicturePath(), 30, 40);
+                imageView.setImageBitmap(bitmap);
+            } catch (Exception e) {
+
+
+            }
+        }
+
+
 
         return v;
     }
 
-    public static Bitmap getBitmap(ContentResolver cr, String fileName) {
+   /* public static Bitmap getBitmap(ContentResolver cr, String fileName) {
         Bitmap bitmap = null;
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inDither = false;
@@ -104,7 +116,54 @@ public class Tp2InfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
         bitmap = MediaStore.Images.Thumbnails.getThumbnail(cr, videoIdLong, MediaStore.Images.Thumbnails.MINI_KIND, options);
         return bitmap;
     }
+*/
 
+    public static Bitmap decodeSampledBitmapFromFile(String pathName,
+                                                     int reqWidth, int reqHeight) {
+
+        // First decode with inJustDecodeBounds=true to check dimensions
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(pathName, options);
+
+        // Calculate inSampleSize
+        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+
+        // Decode bitmap with inSampleSize set
+        options.inJustDecodeBounds = false;
+
+        Matrix matrix = new Matrix();
+        matrix.postRotate(90);
+
+        Bitmap scaledBitmap = BitmapFactory.decodeFile(pathName, options);
+
+        Bitmap rotatedBitmap = Bitmap.createBitmap(scaledBitmap , 0, 0,
+                scaledBitmap .getWidth(), scaledBitmap .getHeight(), matrix, true);
+        return rotatedBitmap;
+    }
+
+    public static int calculateInSampleSize(
+            BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) > reqHeight
+                    && (halfWidth / inSampleSize) > reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+
+        return inSampleSize;
+    }
 
 
 

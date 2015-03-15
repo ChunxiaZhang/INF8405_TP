@@ -53,7 +53,8 @@ public class BetweenMarkers {
         double latitudeB = locationB.getLatitude();
         double longitudeB = locationB.getLongitude();
 
-        boolean BNothA, BEastA;
+        boolean BNothA = false;
+        boolean BEastA = false;
 
         if ((latitudeB - latitudeA) > 0) {
             BNothA = true;
@@ -61,7 +62,7 @@ public class BetweenMarkers {
             BNothA = false;
         }
 
-        if((longitudeB >= 0 && latitudeA >= 0) || (longitudeB <= 0 && longitudeA <= 0)) { //A,B are all in East longitude or are all in West longitude
+        /*if((longitudeB >= 0 && latitudeA >= 0) || (longitudeB <= 0 && longitudeA <= 0)) { //A,B are all in East longitude or are all in West longitude
             if(longitudeB >= longitudeA)
                 BEastA = true;
             else
@@ -80,6 +81,43 @@ public class BetweenMarkers {
                 BEastA = false;
             }
 
+        }*/
+
+        //B is in West longitude, A is in East longitude
+        if (longitudeA > 0 && latitudeB < 0) {
+            if (longitudeA - longitudeB >= 180) {
+                BEastA = true;
+            } else {
+                BEastA = false;
+            }
+        }
+
+        //B is in East longitude, A is in West longitude
+        if (latitudeA < 0 && latitudeB >0)
+        {
+            if(longitudeB - longitudeA <= 180) {
+                BEastA = true;
+            } else {
+                BEastA = false;
+            }
+
+        }
+
+        //if A and B are both in the East longitude
+        if ((longitudeB >= 0 && latitudeA >= 0)) {
+            if(longitudeB >= longitudeA)
+                BEastA = true;
+            else
+                BEastA = false;
+        }
+
+        //if A and B are both in the West longitude
+        if ((longitudeB <= 0 && longitudeA <= 0)) {
+            if (longitudeB >= longitudeA) {
+                BEastA = false;
+            } else {
+                BEastA = true;
+            }
         }
 
         if(latitudeA == latitudeB && longitudeA == longitudeB) { //A, B are same position

@@ -28,14 +28,14 @@ public class DrawItinerary {
         Iterator<Tp2Marker> iterator = markers.iterator();
         Tp2Marker markerA = iterator.next();
 
-        DrawTp2Marker.setTp2Marker(context, mMap, markerA);
+        DrawTp2Marker.setTp2Marker(context, mMap, markerA, markers);
         Tp2Marker markerB = new Tp2Marker();
         while (iterator.hasNext()) {
 
 
             markerB = iterator.next();
 
-            DrawTp2Marker.setTp2Marker(context, mMap, markerB);
+            DrawTp2Marker.setTp2Marker(context, mMap, markerB, markers);
 
             Tp2PolyLine.drawLineBetweenTwoMarkers(mMap, markerA.getLatLng(), markerB.getLatLng());
 
@@ -68,7 +68,7 @@ public class DrawItinerary {
                 Iterator<Tp2Marker> i = markers.iterator();
                 Tp2Marker markerA = i.next();
                 Log.i("draw", "time " + markerA.getIm());
-                DrawTp2Marker.setTp2Marker(context, mMap, markerA);
+                DrawTp2Marker.setTp2Marker(context, mMap, markerA, markers);
 
                 Tp2Marker markerB = new Tp2Marker();
                 while (i.hasNext()) {
@@ -76,7 +76,7 @@ public class DrawItinerary {
 
                     markerB = i.next();
 
-                    DrawTp2Marker.setTp2Marker(context, mMap, markerB);
+                    DrawTp2Marker.setTp2Marker(context, mMap, markerB, markers);
 
                     Tp2PolyLine.drawLineBetweenTwoMarkers(mMap, markerA.getLatLng(), markerB.getLatLng());
 

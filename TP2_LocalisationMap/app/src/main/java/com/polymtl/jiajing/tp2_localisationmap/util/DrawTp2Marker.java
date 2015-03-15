@@ -13,6 +13,7 @@ import com.polymtl.jiajing.tp2_localisationmap.model.Tp2Marker;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 
 /**
@@ -29,16 +30,15 @@ public class DrawTp2Marker {
         markerOpt.visible(true);
         markerOpt.anchor(0.5f, 0.5f);//set to be center of the picture
         markerOpt.icon(BitmapDescriptorFactory.fromResource((R.drawable.marker)));
-        markerOpt.title(latLng.toString());
+        markerOpt.snippet(latLng.toString());
         mMap.addMarker(markerOpt);
 
     }
 
-    public static void setTp2Marker(Context context, GoogleMap mMap, Tp2Marker tp2Marker) {
+    public static void setTp2Marker(Context context, GoogleMap mMap, Tp2Marker tp2Marker, List<Tp2Marker> markers) {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss z");
         sdf.setTimeZone(TimeZone.getDefault());
-        Log.i("draw itinerary", "time "+ tp2Marker.getIm());
         Date now = new Date(tp2Marker.getIm());
         String strDate = sdf.format(now);
 
@@ -59,11 +59,11 @@ public class DrawTp2Marker {
         markerOpt.visible(true);
         markerOpt.anchor(0.5f, 0.5f);//set to be center of the picture
         markerOpt.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker));
-        markerOpt.title(tp2Marker.getPicturePath()); //use to get picture
+        markerOpt.title(tp2Marker.getId()+"");
         markerOpt.snippet(info);
 
         mMap.addMarker(markerOpt);
-        mMap.setInfoWindowAdapter(new Tp2InfoWindowAdapter(context));
+        mMap.setInfoWindowAdapter(new Tp2InfoWindowAdapter(context, markers));
 
     }
 

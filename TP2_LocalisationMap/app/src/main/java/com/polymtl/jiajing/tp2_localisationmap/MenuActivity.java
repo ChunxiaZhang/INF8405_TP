@@ -60,7 +60,7 @@ public class MenuActivity extends ActionBarActivity {
         seekBarFrequency = (SeekBar) findViewById(R.id.seekBarFrequency);
 
         textViewZoom.setText("Zoom: " + seekBarZoom.getProgress());
-        textViewFrequency.setText("Frequency: " + (seekBarFrequency.getProgress()+1) + "m");
+        textViewFrequency.setText("Frequency: " + seekBarFrequency.getProgress() + "s");
 
 
         radioGroupMode.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
@@ -85,8 +85,8 @@ public class MenuActivity extends ActionBarActivity {
         seekBarFrequency.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                frequency.setTime((seekBarFrequency.getProgress() + 1) * 60); //the minimum is 1 minute, maximum is 15 minutes
-                textViewFrequency.setText("Frequency:" + (seekBarFrequency.getProgress() + 1) + "m");
+                frequency.setTime(seekBarFrequency.getProgress()); //the minimum is 30s, maximum is 3 minutes
+                textViewFrequency.setText("Frequency:" + seekBarFrequency.getProgress() + "s");
             }
 
             @Override

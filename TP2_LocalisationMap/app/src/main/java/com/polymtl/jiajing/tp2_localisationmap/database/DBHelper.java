@@ -44,6 +44,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     //TABLE_MARKER's column names
     private static final String KEY_ID_ITINERARY = "_id_itinerary";
+    private static final String KEY_ID_POSITION = "_id_position";
     //Coord includes latitude, longitude, altitude
     private static final String KEY_LATITUDE = "latitude"; // latitude
     private static final String KEY_LONGITUDE = "longitude"; // longitude
@@ -59,7 +60,8 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String KEY_INFO = "info"; //information of connection
 
     private static final String CREATE_TABLE_MARKER = "CREATE TABLE " + TABLE_MARKER + " (" + KEY_ID +
-            " INTEGER PRIMARY KEY," + KEY_ID_ITINERARY + " INTEGER KEY," + KEY_LATITUDE + " DOUBLE," +
+            " INTEGER PRIMARY KEY," + KEY_ID_ITINERARY + " INTEGER KEY," + KEY_ID_POSITION + " INTEGER KEY,"
+            + KEY_LATITUDE + " DOUBLE," +
             KEY_LONGITUDE + " DOUBLE," + KEY_ALTITUDE + " DOUBLE," + KEY_IM + " LONG," + KEY_DIR_DEP +
             " STRING," + KEY_DRP + " FLOAT," + KEY_VM + " FLOAT," + KEY__MARKER_DT + " FLOAT," + KEY_MOD_LOC +
             " STRING," + KEY_NIV_BATT + " FLOAT," + KEY_INFO + " STRING" + ")";
@@ -130,7 +132,6 @@ public class DBHelper extends SQLiteOpenHelper {
         values.put(KEY_START_TIME, itinerary.getStartTime());
         values.put(KEY_STOP_TIME, itinerary.getStopTime());
         values.put(KEY_NBR_SB, itinerary.getNbr_sb());
-        Log.e(LOG, "put getNbr_sb " + itinerary.getNbr_sb());
         values.put(KEY_POWER_CONSUMPTION, itinerary.getAllPowerConsumption());
 
         //insert row
@@ -178,14 +179,10 @@ public class DBHelper extends SQLiteOpenHelper {
 
     //Get all itineraries
     public List<Itinerary> getAllItineraries() {
-        Log.i(LOG, "start getAllItineraries");
+
         SQLiteDatabase db = this.getReadableDatabase();
-        Log.i(LOG, "start read database");
 
         Cursor cursor = db.rawQuery("SELECT * FROM "+TABLE_ITINERARY+" ORDER BY start_time DESC LIMIT 3", null);
-        //Cursor cursor = db.query(TABLE_ITINERARY, null, null, null, null, null, null);
-
-        Log.i(LOG, "count of row " + cursor.getCount());
 
         List<Itinerary> result = new ArrayList<>();
         while ((cursor.moveToNext())) {
@@ -195,7 +192,6 @@ public class DBHelper extends SQLiteOpenHelper {
             itinerary.setAllPowerConsumption(cursor.getFloat(cursor.getColumnIndex(KEY_POWER_CONSUMPTION)));
             itinerary.setNbr_sb(cursor.getInt(cursor.getColumnIndex(KEY_NBR_SB)));
             itinerary.setStartTime(cursor.getLong(cursor.getColumnIndex(KEY_START_TIME)));
-            Log.i(LOG, "start"+cursor.getLong(cursor.getColumnIndex(KEY_START_TIME)));
             itinerary.setStopTime(cursor.getLong(cursor.getColumnIndex(KEY_STOP_TIME)));
 
             result.add(itinerary);
@@ -268,6 +264,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         ContentValues values = new ContentValues();
         values.put(KEY_ID_ITINERARY, itinerary_id);
+        values.put(KEY_ID_POSITION, marker.getId());
         values.put(KEY_LATITUDE, marker.getLatitude());
         values.put(KEY_LONGITUDE, marker.getLongitude());
         values.put(KEY_ALTITUDE, marker.getAltitude());
@@ -305,6 +302,7 @@ public class DBHelper extends SQLiteOpenHelper {
         }
 
         Tp2Marker marker = new Tp2Marker();
+        marker.setId(cursor.getInt(cursor.getColumnIndex(KEY_ID_POSITION)));
         marker.setAltitude(cursor.getDouble(cursor.getColumnIndex(KEY_ALTITUDE)));
         marker.setLatitude(cursor.getDouble(cursor.getColumnIndex(KEY_LATITUDE)));
         marker.setLongitude(cursor.getDouble(cursor.getColumnIndex(KEY_LONGITUDE)));
@@ -345,6 +343,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 Tp2Marker marker = new Tp2Marker();
                 marker.setId(c.getInt(c.getColumnIndex(KEY_ID)));
                 marker.setItineraryId(c.getInt(c.getColumnIndex(KEY_ID_ITINERARY)));
+                marker.setItineraryId(c.getInt(c.getColumnIndex(KEY_ID_POSITION)));
                 marker.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
                 marker.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
                 marker.setAltitude(c.getDouble(c.getColumnIndex(KEY_ALTITUDE)));
