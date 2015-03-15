@@ -1,4 +1,4 @@
-package com.polymtl.jiajing.tp2_localisationmap.util;
+package com.polymtl.jiajing.tp2_localisationmap.ui;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -89,35 +89,6 @@ public class Tp2InfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
         return v;
     }
 
-   /* public static Bitmap getBitmap(ContentResolver cr, String fileName) {
-        Bitmap bitmap = null;
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inDither = false;
-        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-        //select condition.
-        String whereClause = MediaStore.Images.Media.DATA + " = '" + fileName + "'";
-
-        //colection of results.
-        Cursor cursor = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,new String[] { MediaStore.Images.Media._ID }, whereClause,null, null);
-        if (cursor == null || cursor.getCount() == 0) {
-            if(cursor != null)
-                cursor.close();
-            return null;
-        }
-        cursor.moveToFirst();
-        //image id in image table.
-        String videoId = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media._ID));
-        cursor.close();
-        if (videoId == null) {
-            return null;
-        }
-        long videoIdLong = Long.parseLong(videoId);
-        //via imageid get the bimap type thumbnail in thumbnail table.
-        bitmap = MediaStore.Images.Thumbnails.getThumbnail(cr, videoIdLong, MediaStore.Images.Thumbnails.MINI_KIND, options);
-        return bitmap;
-    }
-*/
-
     public static Bitmap decodeSampledBitmapFromFile(String pathName,
                                                      int reqWidth, int reqHeight) {
 
@@ -164,14 +135,6 @@ public class Tp2InfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
 
         return inSampleSize;
     }
-
-
-
-//    public static String timeFromUTCSecs(Context ctx, long secs) {
-//        return DateUtils.formatDateTime(ctx, secs * 1000,
-//                DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE
-//                        | DateUtils.FORMAT_NUMERIC_DATE);
-//    }
 
 }
 

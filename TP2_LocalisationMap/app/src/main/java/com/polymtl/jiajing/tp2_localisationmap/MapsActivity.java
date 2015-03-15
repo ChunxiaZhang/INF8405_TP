@@ -51,30 +51,24 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.polymtl.jiajing.tp2_localisationmap.database.DBHelper;
 import com.polymtl.jiajing.tp2_localisationmap.model.BaseStation;
 import com.polymtl.jiajing.tp2_localisationmap.model.BetweenMarkers;
-import com.polymtl.jiajing.tp2_localisationmap.model.ConnectGPSInfo;
-import com.polymtl.jiajing.tp2_localisationmap.model.ConnectInfo;
 import com.polymtl.jiajing.tp2_localisationmap.model.ConnectMode;
 import com.polymtl.jiajing.tp2_localisationmap.model.ConnectNetworkInfo;
 import com.polymtl.jiajing.tp2_localisationmap.model.Frequency;
 import com.polymtl.jiajing.tp2_localisationmap.model.Itinerary;
-import com.polymtl.jiajing.tp2_localisationmap.model.MarkerGPS;
 import com.polymtl.jiajing.tp2_localisationmap.model.Tp2Marker;
 import com.polymtl.jiajing.tp2_localisationmap.model.Power;
 import com.polymtl.jiajing.tp2_localisationmap.model.ZoomLevel;
 import com.polymtl.jiajing.tp2_localisationmap.util.AdjustCamera;
+import com.polymtl.jiajing.tp2_localisationmap.util.AgentApplication;
 import com.polymtl.jiajing.tp2_localisationmap.util.DetectConnectivity;
-import com.polymtl.jiajing.tp2_localisationmap.util.DrawItinerary;
-import com.polymtl.jiajing.tp2_localisationmap.util.DrawPathAsyncTask;
-import com.polymtl.jiajing.tp2_localisationmap.util.DrawTp2Marker;
+import com.polymtl.jiajing.tp2_localisationmap.ui.DrawItinerary;
+import com.polymtl.jiajing.tp2_localisationmap.ui.DrawPathAsyncTask;
+import com.polymtl.jiajing.tp2_localisationmap.ui.DrawTp2Marker;
 import com.polymtl.jiajing.tp2_localisationmap.util.GetGsmCellLocation;
-import com.polymtl.jiajing.tp2_localisationmap.util.Tp2PolyLine;
-import com.polymtl.jiajing.tp2_localisationmap.tp2Test.TestData;
 
-import static android.telephony.PhoneStateListener.LISTEN_SIGNAL_STRENGTHS;
-import static com.polymtl.jiajing.tp2_localisationmap.util.Tp2PolyLine.*;
+import static com.polymtl.jiajing.tp2_localisationmap.ui.Tp2PolyLine.*;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import android.util.Log;
 
@@ -112,12 +106,10 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
 
     private Itinerary thisItinerary;
     private long itinerary_id;
-    private Itinerary testItinerary; //used for testing
 
 
     private Tp2Marker currentMarker;
     private List<Tp2Marker> markers;
-    private List<Tp2Marker> testMarkers;
     private List<BaseStation> stations;
 
     private boolean isOpenTracking = false;
@@ -131,6 +123,8 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        AgentApplication.getInstance().addActivity(this);
+
         setContentView(R.layout.activity_maps);
 
         context = getApplicationContext();
@@ -149,6 +143,7 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
 
         dbHelper = new DBHelper(getApplicationContext());
 
+        //dbHelper.deletAllDB();
         setUpMapIfNeeded();
         setUpButtons();
         setUpPopupDestination();
@@ -250,8 +245,6 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
         @Override
         public void onLocationChanged(Location location) {
 
-            Log.i("LocationListener: ", "Location changed");
-
             Toast.makeText(MapsActivity.this, "Location changed",
                     Toast.LENGTH_LONG).show();
 
@@ -265,9 +258,8 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
             setConnectInfo();
 
             initialCurrentMarker();
-            Log.i("Set marker ", "initialCurrentMarker");
             updateToNewLocation();
-            Log.i("Set marker ", "updateToNewLocation");
+
             alertOpenCamera();
 
         }
@@ -301,7 +293,6 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
 
     private void setConnectInfo() {
 
-        Log.i("setConnectInfo", "start");
         if (provider == LocationManager.GPS_PROVIDER) {
             //get best wifi info
             broadcastReceiver = new BroadcastReceiver() {
@@ -357,7 +348,6 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
 
         //add Tp2Marker
         markers.add(currentMarker);
-        Log.i("Markers number", ""+markers.size());
 
     }
 
@@ -400,7 +390,7 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
     @Override
     public void pictureTaken(String picturePath) {
         //markers.get(markers.size()-1).setPicturePath(picturePath);
-        //TODO set pictures for windows adapter
+
         if (picturePath != null) {
             currentMarker.setPicturePath(picturePath);
             Log.i("setPicturePath", picturePath);
@@ -472,7 +462,6 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
 
                         mMap.addMarker(new MarkerOptions().position(new LatLng(45.508536, -73.597929)).title("Marker"));
                         // Move the camera instantly to Montreal.
-                        Log.i("Start tracking: " , "Move the camera instantly to Montreal.");
                         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(45.508536, -73.597929), 15));
                         return;
                     }
@@ -492,7 +481,6 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
 
 
                     //draw the first current marker
-                    //DrawTp2Marker.setTp2Marker(MapsActivity.this, mMap, currentMarker);
                     DrawTp2Marker.setTp2Marker(mMap, new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()));
 
                     //request listening location changed
@@ -505,7 +493,6 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
 
                     //start listening cell location changed
                     if (provider == LocationManager.NETWORK_PROVIDER) {
-                        Log.i("provider", "NETWORK_PROVIDER");
                         setUpPhoneStateListener();
                     }
 
@@ -624,7 +611,6 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
                 if (to.getText().length() > 0) {
                     btn_search.setEnabled(true);
                     addressTo = to.getText().toString();
-                    Log.i("to address:", addressTo);
                 }
             }
         });
@@ -668,7 +654,6 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
                 DrawTp2Marker.setTp2Marker(mMap, fromLatLng);
                 DrawTp2Marker.setTp2Marker(mMap, toLatLng);
 
-                Log.i("destination:",points.size() + ": " + points.get(0).toString() + ", " + points.get(1));
                 AdjustCamera.fixZoom(mMap, points);
             }
         });
@@ -715,78 +700,6 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
         return result;
     }
 
-    private void prepareTestData() {
-        //The test itinerary
-        //Create itinerary
-        TestData testData = new TestData();
-        testData.setTestItinerary(getApplicationContext(), provider);
-        testItinerary = testData.getTestItinerary();
-        //Log.i("test get itinerary:", " Nbr_sb: "+testItinerary.getNbr_sb());
-        testMarkers = testData.getTestMarkers();
-
-        //Insert testItinerary in db
-        long testitinerary_id = dbHelper.createItinerary(testItinerary);
-        //Insert markers in db
-        for (int i = 0; i < testMarkers.size(); i++) {
-            dbHelper.createMarker(testMarkers.get(i), testitinerary_id);
-        }
-
-        Itinerary test = dbHelper.getItinerary(1424924854700l);
-        if (test == null) {
-            Log.i("test get itinerary", " " + "test is null");
-        }
-        Log.i("test get itinerary", " getDt " + test.getDt());
-        Log.i("test get itinerary", "getStartTime " + test.getStartTime());
-        Log.i("test get itinerary", " getNbr_sb " + test.getNbr_sb()); //????why it changed to 0
-        showTestItinerary();
-    }
-
-    private void showTestItinerary() {
-        TestData testData = new TestData();
-        testData.setTestItinerary(getApplicationContext(), provider);
-        testItinerary = testData.getTestItinerary();
-        //Log.i("test get itinerary:", " Nbr_sb: "+testItinerary.getNbr_sb());
-        testMarkers = testData.getTestMarkers();
-
-        //Insert testItinerary in db
-        long testItinerary_id = dbHelper.createItinerary(testItinerary);
-        //Insert markers in db
-        for (int i = 0; i < testMarkers.size(); i++) {
-            dbHelper.createMarker(testMarkers.get(i), testItinerary_id);
-        }
-
-        Itinerary test = dbHelper.getItinerary(1424924854700l);
-        if (test == null) {
-            Log.i("test get itinerary", " " + "test is null");
-        }
-        Log.i("test get itinerary", " getDt " + test.getDt());
-        Log.i("test get itinerary", "getStartTime " + test.getStartTime());
-        Log.i("test get itinerary", " getNbr_sb " + test.getNbr_sb()); //????why it changed to 0
-
-        ///////draw
-        List<LatLng> points = new ArrayList<>();
-        Iterator<Tp2Marker> i = testMarkers.iterator();
-        int n = 0;
-        LatLng from, to;
-        from = i.next().getLatLng();
-        DrawTp2Marker.setTp2Marker(mMap, from);
-
-        while (i.hasNext()) {
-            Log.i("test:", "has next");
-            Tp2Marker p = i.next();
-            to = p.getLatLng();
-
-            DrawTp2Marker.setTp2Marker(mMap, to);
-            Log.i("test:", "set a marker " + n++);
-            Tp2PolyLine.drawLineBetweenTwoMarkers(mMap, from, to);
-            from = to;
-            points.add(p.getLatLng());
-        }
-        AdjustCamera.fixZoom(mMap, points);
-    }
-
-
-
     //set up base station changed listener
     public void setUpPhoneStateListener() {
 
@@ -826,7 +739,6 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
                 //add station to list
                 stations.add(station);
 
-                //save station to database
             }
 
             @Override

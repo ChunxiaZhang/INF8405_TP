@@ -58,20 +58,20 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String KEY_MOD_LOC = "mod_loc"; // le mode de localisation: gps or network
     private static final String KEY_NIV_BATT = "niv_batt"; // power level
     private static final String KEY_INFO = "info"; //information of connection
+    private static final String KEY_PICTURE_PATH = "picture_path";
 
     private static final String CREATE_TABLE_MARKER = "CREATE TABLE " + TABLE_MARKER + " (" + KEY_ID +
             " INTEGER PRIMARY KEY," + KEY_ID_ITINERARY + " INTEGER KEY," + KEY_ID_POSITION + " INTEGER KEY,"
             + KEY_LATITUDE + " DOUBLE," +
             KEY_LONGITUDE + " DOUBLE," + KEY_ALTITUDE + " DOUBLE," + KEY_IM + " LONG," + KEY_DIR_DEP +
             " STRING," + KEY_DRP + " FLOAT," + KEY_VM + " FLOAT," + KEY__MARKER_DT + " FLOAT," + KEY_MOD_LOC +
-            " STRING," + KEY_NIV_BATT + " FLOAT," + KEY_INFO + " STRING" + ")";
-
+            " STRING," + KEY_NIV_BATT + " FLOAT," + KEY_INFO + " STRING," + KEY_PICTURE_PATH + " STRING" + ")";
 
     //STATION table column names
     //KEY_ID_ITINERARY, KEY_LATITUDE, KEY_LONGITUDE are same with MARKER
 
     private static final String CREATE_TABLE_STATION = "CREATE TABLE " + TABLE_STATION + " (" + KEY_ID +
-            " INTIEGER PRIMARY KEY," + KEY_ID_ITINERARY + " INTEGER KEY," + KEY_LATITUDE + " DOUBLE," +
+            " INTEGER PRIMARY KEY," + KEY_ID_ITINERARY + " INTEGER KEY," + KEY_LATITUDE + " DOUBLE," +
             KEY_LONGITUDE + " DOUBLE" + ")";
 
     //ITINERARY table column names
@@ -119,7 +119,18 @@ public class DBHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    public void deletAllDB() {
+        //upgrade drop older tables
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_ITINERARY);
 
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_MARKER);
+
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_STATION);
+
+        //create new tables
+        onCreate(db);
+    }
     // Create a itinerary
     public long createItinerary(Itinerary itinerary) {
 
@@ -276,6 +287,7 @@ public class DBHelper extends SQLiteOpenHelper {
         values.put(KEY_MOD_LOC, marker.getMod_loc());
         values.put(KEY_NIV_BATT, marker.getNiv_batt());
         values.put(KEY_INFO, marker.getInfo());
+        values.put(KEY_PICTURE_PATH, marker.getPicturePath());
 
         //insert row
         long marker_id = db.insert(TABLE_MARKER, null, values);
@@ -314,6 +326,7 @@ public class DBHelper extends SQLiteOpenHelper {
         marker.setMod_loc(cursor.getString(cursor.getColumnIndex(KEY_MOD_LOC)));
         marker.setNiv_batt(cursor.getFloat(cursor.getColumnIndex(KEY_NIV_BATT)));
         marker.setInfo(cursor.getString(cursor.getColumnIndex(KEY_INFO)));
+        marker.setPicturePath(cursor.getString(cursor.getColumnIndex(KEY_PICTURE_PATH)));
 
         return marker;
     }
@@ -343,7 +356,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 Tp2Marker marker = new Tp2Marker();
                 marker.setId(c.getInt(c.getColumnIndex(KEY_ID)));
                 marker.setItineraryId(c.getInt(c.getColumnIndex(KEY_ID_ITINERARY)));
-                marker.setItineraryId(c.getInt(c.getColumnIndex(KEY_ID_POSITION)));
+                marker.setId(c.getInt(c.getColumnIndex(KEY_ID_POSITION)));
                 marker.setLatitude(c.getDouble(c.getColumnIndex(KEY_LATITUDE)));
                 marker.setLongitude(c.getDouble(c.getColumnIndex(KEY_LONGITUDE)));
                 marker.setAltitude(c.getDouble(c.getColumnIndex(KEY_ALTITUDE)));
@@ -355,6 +368,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 marker.setMod_loc(c.getString(c.getColumnIndex(KEY_MOD_LOC)));
                 marker.setNiv_batt(c.getFloat(c.getColumnIndex(KEY_NIV_BATT)));
                 marker.setInfo(c.getString(c.getColumnIndex(KEY_INFO)));
+                marker.setPicturePath(c.getString(c.getColumnIndex(KEY_PICTURE_PATH)));
 
                 //ade to markers list
                 markers.add(marker);

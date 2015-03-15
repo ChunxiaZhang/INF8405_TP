@@ -1,4 +1,4 @@
-package com.polymtl.jiajing.tp2_localisationmap.util;
+package com.polymtl.jiajing.tp2_localisationmap.ui;
 
 import android.graphics.Color;
 import android.util.Log;

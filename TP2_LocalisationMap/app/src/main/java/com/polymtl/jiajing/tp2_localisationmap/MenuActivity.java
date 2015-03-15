@@ -8,6 +8,7 @@ import android.provider.Settings;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,6 +21,7 @@ import android.widget.TextView;
 import com.polymtl.jiajing.tp2_localisationmap.model.ConnectMode;
 import com.polymtl.jiajing.tp2_localisationmap.model.Frequency;
 import com.polymtl.jiajing.tp2_localisationmap.model.ZoomLevel;
+import com.polymtl.jiajing.tp2_localisationmap.util.AgentApplication;
 import com.polymtl.jiajing.tp2_localisationmap.util.DetectConnectivity;
 
 
@@ -38,9 +40,11 @@ public class MenuActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        AgentApplication.getInstance().addActivity(this);
+
         setContentView(R.layout.activity_menu);
 
-        detectEnvirement();
+        detectEnvironment();
         setUpWidgets();
 
 
@@ -156,6 +160,13 @@ public class MenuActivity extends ActionBarActivity {
             }
         });
 
+        buttonExit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AgentApplication.getInstance().onTerminate();
+            }
+        });
+
     }
 
     private void openMapsActivity(Boolean withHistory) {
@@ -214,8 +225,17 @@ public class MenuActivity extends ActionBarActivity {
         // Activity being restarted from stopped state
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            AgentApplication.getInstance().onTerminate();
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
 ////
-    public void detectEnvirement() {
+    public void detectEnvironment() {
 
        /* if (DetectConnectivity.isNetworkAvailable(getApplicationContext())) {
             Log.i("detectConnectivity"," network is available");

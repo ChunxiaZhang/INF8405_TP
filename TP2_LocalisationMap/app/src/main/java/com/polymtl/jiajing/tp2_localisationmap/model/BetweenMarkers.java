@@ -185,16 +185,4 @@ public class BetweenMarkers {
         return result;
     }
 
-    ////????????????this method put here well or not??????
-    /*public void drawLineBetweenTwoMarkers(GoogleMap map, LatLng from, LatLng to) {
-        List<LatLng> points = new ArrayList<LatLng>();
-        points.add(from);
-        points.add(to);
-
-        map.addPolyline(new PolylineOptions()
-             .add(from, to)
-             .width(5)
-             .color(Color.RED));
-    }*/
-
 }

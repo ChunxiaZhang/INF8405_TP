@@ -1,4 +1,4 @@
-package com.polymtl.jiajing.tp2_localisationmap.util;
+package com.polymtl.jiajing.tp2_localisationmap.ui;
 
 import android.content.Context;
 import android.util.Log;
@@ -8,6 +8,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.polymtl.jiajing.tp2_localisationmap.database.DBHelper;
 import com.polymtl.jiajing.tp2_localisationmap.model.Itinerary;
 import com.polymtl.jiajing.tp2_localisationmap.model.Tp2Marker;
+import com.polymtl.jiajing.tp2_localisationmap.util.AdjustCamera;
 
 import java.util.ArrayList;
 import java.util.Iterator;

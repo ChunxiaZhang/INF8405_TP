@@ -83,7 +83,7 @@ public class Tp2Marker {
         return this.itineraryId;
     }
     public void setItineraryId(int id) {
-        this.itineraryId = itineraryId;
+        this.itineraryId = id;
     }
 
     public double getAltitude() {
