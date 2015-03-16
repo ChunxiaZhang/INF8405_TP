@@ -1,6 +1,7 @@
 package com.polymtl.jiajing.tp2_localisationmap.ui;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.util.Log;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -8,7 +9,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.polymtl.jiajing.tp2_localisationmap.database.DBHelper;
 import com.polymtl.jiajing.tp2_localisationmap.model.Itinerary;
 import com.polymtl.jiajing.tp2_localisationmap.model.Tp2Marker;
-import com.polymtl.jiajing.tp2_localisationmap.util.AdjustCamera;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -31,14 +31,16 @@ public class DrawItinerary {
 
         DrawTp2Marker.setTp2Marker(context, mMap, markerA, markers);
         Tp2Marker markerB = new Tp2Marker();
-        while (iterator.hasNext()) {
 
+
+
+        while (iterator.hasNext()) {
 
             markerB = iterator.next();
 
             DrawTp2Marker.setTp2Marker(context, mMap, markerB, markers);
 
-            Tp2PolyLine.drawLineBetweenTwoMarkers(mMap, markerA.getLatLng(), markerB.getLatLng());
+            Tp2PolyLine.drawLineBetweenTwoMarkers(mMap, markerA.getLatLng(), markerB.getLatLng(), Color.RED);
 
             markerA = markerB;
         }
@@ -60,9 +62,14 @@ public class DrawItinerary {
         }
         Log.i("itineraries size", "" + itineraries.size());
         Iterator<Itinerary> iterator = itineraries.iterator();
+        int[] color = {Color.RED, Color.YELLOW, Color.GREEN};
+        int colorIndex = 0;
+
         while (iterator.hasNext()) {
 
             List<Tp2Marker> markers = dbHelper.getMarkersOfItinerary(iterator.next().getStartTime());
+
+
             if (markers.size() > 0) {
 
 
@@ -79,13 +86,16 @@ public class DrawItinerary {
 
                     DrawTp2Marker.setTp2Marker(context, mMap, markerB, markers);
 
-                    Tp2PolyLine.drawLineBetweenTwoMarkers(mMap, markerA.getLatLng(), markerB.getLatLng());
+                    Tp2PolyLine.drawLineBetweenTwoMarkers(mMap, markerA.getLatLng(), markerB.getLatLng(), color[colorIndex]);
 
                     markerA = markerB;
                 }
+
                 points.add(markers.get(0).getLatLng());
                 points.add(markers.get(markers.size() - 1).getLatLng());
             }
+            colorIndex++;
+
         }
         if (points.size() > 0) {
             AdjustCamera.fixZoom(mMap, points);

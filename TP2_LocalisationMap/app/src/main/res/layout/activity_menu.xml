@@ -5,7 +5,7 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:background="@drawable/room"
-    tools:context="com.polymtl.jiajing.tp2_localisationmap.MenuActivity">
+    tools:context="com.polymtl.jiajing.tp2_localisationmap.ui.MenuActivity">
 
     <LinearLayout
         android:orientation="vertical"

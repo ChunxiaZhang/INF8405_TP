@@ -25,4 +25,5 @@
     <string name="ignore">Ignore</string>
     <string name="settings">Settings</string>
     <string name="imgcapture">Take Picture</string>
+    <string name="itineraries_info">Itineraries:</string>
 </resources>

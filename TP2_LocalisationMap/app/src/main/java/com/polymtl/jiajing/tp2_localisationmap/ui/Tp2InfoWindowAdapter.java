@@ -54,11 +54,6 @@ public class Tp2InfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
     @Override
     public View getInfoContents (com.google.android.gms.maps.model.Marker marker){
 
-       /* String[] projection = {MediaStore.Images.Thumbnails._ID, MediaStore.Images.Thumbnails.IMAGE_ID,
-                MediaStore.Images.Thumbnails.DATA};
-        Cursor cursor = cr.query(MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI, projection,
-                null, null, null);*/
-
         LayoutInflater inflater = (LayoutInflater) context.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
         View v = inflater.inflate(R.layout.marker, null);
 

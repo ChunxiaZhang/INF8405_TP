@@ -56,22 +56,26 @@ public class GetGsmCellLocation {
     }
 
     public void groupURLSent(){
-        //String key = "59c6c861-b14d-4be2-8e3f-8b7e91d9a9db";
-        String key = "59c6c861b14d4be28e3f8b7e91d9a9db";
-       // http://www.opencellid.org/cell/get?key=59c6c861b14d4be28e3f8b7e91d9a9dbf&mcc=250&mnc=99&cellid=29518&lac=0&fmt=txt
+        String key = "59c6c861-b14d-4be2-8e3f-8b7e91d9a9db";
+        //String key = "59c6c861b14d4be28e3f8b7e91d9a9db";
+       // http://www.opencellid.org/cell/get?key=29e99612-7948-40c4-acd2-317f1244f9e0&mcc=250&mnc=99&cellid=29518&lac=0&format=txt
+        //http://www.opencellid.org/cell/get?key=29e99612-7948-40c4-acd2-317f1244f9e0&mcc=310&mnc=260&cellid=29021&lac=328
+        //http://www.opencellid.org/cell/get?key=29e99612-7948-40c4-acd2-317f1244f9e0&mcc=310&mnc=260&lac=328&cellid=29021
        /* strURLSent =
-                "http://www.opencellid.org/cell/get?key=" + key
+                "http://www.opencellid.org/cell/get?apiKey=" + key
                         +"&mcc=" + mcc
                         +"&mnc=" + mnc
                         +"&cellid=" + cellid
                         +"&lac=" + lac
-                        +"&fmt=txt";*/
-        strURLSent =
+                        +"&format=txt";*/
+        strURLSent = "http://www.opencellid.org/cell/get?key=59c6c861-b14d-4be2-8e3f-8b7e91d9a9db&mcc=" + mcc +"&mnc=" + mnc +"&lac=" + lac +"&cellid=" + cellid;
+
+        /*strURLSent =
                 "http://www.opencellid.org/cell/get?key=" + key
                         +"&mcc=" + mcc
                         +"&mnc=" + mnc
                         +"&cellid=" + cellid
-                        +"&lac=" + lac;
+                        +"&lac=" + lac;*/
         Log.i("strURLSent", strURLSent);
     }
 

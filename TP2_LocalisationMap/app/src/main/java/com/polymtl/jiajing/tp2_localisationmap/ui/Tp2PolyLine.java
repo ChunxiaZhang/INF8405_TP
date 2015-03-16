@@ -18,12 +18,13 @@ import java.util.List;
  */
 public class Tp2PolyLine {
 
-    public static void drawLineBetweenTwoMarkers(GoogleMap mMap, LatLng from, LatLng to) {
+    public static void drawLineBetweenTwoMarkers(GoogleMap mMap, LatLng from, LatLng to, int color) {
 
         mMap.addPolyline(new PolylineOptions()
                 .add(from, to)
-                .width(5)
-                .color(Color.RED));
+                .width(10)
+                .color(color));
+        Log.i("color", color+"");
     }
 
     /**

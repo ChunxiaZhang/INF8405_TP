@@ -41,6 +41,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -68,8 +69,12 @@ import com.polymtl.jiajing.tp2_localisationmap.util.GetGsmCellLocation;
 
 import static com.polymtl.jiajing.tp2_localisationmap.ui.Tp2PolyLine.*;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
+
 import android.util.Log;
 
 public class MapsActivity extends FragmentActivity implements ImageCaptureFragment.PictureTakenListener{
@@ -79,6 +84,8 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
     private ImageButton btn_fromTo, btn_start_stop, btn_clean;
+    private TextView info_itineraries;
+
     private PopupWindow destinationPopup;
     private View destinationView;
     private String addressTo, addressFrom;
@@ -135,6 +142,8 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
         frequency.setTime(getIntent().getIntExtra("frequency", frequency.getFrequency()));
         withHistory = getIntent().getBooleanExtra("withHistory", false);
 
+        info_itineraries = (TextView) findViewById(R.id.info_itineraries);
+
         isOpenTracking = false;
 
         locationManager =  (LocationManager) context.getSystemService(LOCATION_SERVICE);
@@ -143,7 +152,6 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
 
         dbHelper = new DBHelper(getApplicationContext());
 
-        //dbHelper.deletAllDB();
         setUpMapIfNeeded();
         setUpButtons();
         setUpPopupDestination();
@@ -188,6 +196,13 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
         }
     }
 
+    public String getFormatTime(Long time) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss z");
+        sdf.setTimeZone(TimeZone.getDefault());
+        Date now = new Date(time);
+        return sdf.format(now);
+    }
+
     /**
      * This is where we can add markers or lines, add listeners or move the camera. In this case, we
      *
@@ -201,6 +216,20 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
                         Toast.LENGTH_LONG).show();
             } else {
                 DrawItinerary.drawAllItineraries(MapsActivity.this, mMap, dbHelper);
+                String text = "Itineraries:\n";
+                List<Itinerary> itineraries = dbHelper.getAllItineraries();
+
+                if (itineraries.size() > 0) {
+                    for (int i = 0; i < itineraries.size(); i++) {
+                        text += "Start:" + getFormatTime(itineraries.get(0).getStartTime())
+                                + " Stop:" + getFormatTime(itineraries.get(0).getStopTime())
+                                + " Markers:" + itineraries.get(0).getNbr_markers()
+                                + " Distance: " + itineraries.get(0).getDt()
+                                + " Speed:" + itineraries.get(0).getDt()/(itineraries.get(0).getStopTime()-itineraries.get(0).getStartTime())
+                                + " Power consumed" + itineraries.get(0).getAllPowerConsumption() + "\n";
+                    }
+                }
+                info_itineraries.setText(text);
             }
 
         } else {
@@ -406,7 +435,10 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
             btn_fromTo.setEnabled(false);
             btn_start_stop.setEnabled(false);
             btn_clean.setEnabled(false);
+        } else {
+            info_itineraries.setEnabled(false);
         }
+
 
         if(isOpenTracking) {
             btn_start_stop.setBackground(getResources().getDrawable(R.drawable.stop));
@@ -433,6 +465,8 @@ public class MapsActivity extends FragmentActivity implements ImageCaptureFragme
                     thisItinerary.setStopPower(markers.get(markers.size()-1).getNiv_batt());
 
                     thisItinerary.setDt(markers.get(markers.size()-1).getLocation().distanceTo(markers.get(0).getLocation()));
+
+                    thisItinerary.setNbr_markers(markers.size());
 
                     //save thisItinerary, stations and markers in DB
                     itinerary_id = dbHelper.createItinerary(thisItinerary);

@@ -11,6 +11,12 @@
         android:id="@+id/mapView"
         android:name="com.google.android.gms.maps.SupportMapFragment" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/itineraries_info"
+        android:id="@+id/info_itineraries" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="60dp"
@@ -40,6 +46,5 @@
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:background="@drawable/cleaner"/>
-
         </LinearLayout>
 </RelativeLayout>
