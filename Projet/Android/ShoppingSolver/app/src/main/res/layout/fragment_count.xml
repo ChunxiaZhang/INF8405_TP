@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+    
+	<TableLayout
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:layout_alignParentTop="true"
+	    android:layout_alignParentLeft="true"
+	    android:layout_marginTop="50dp"
+	    android:layout_marginLeft="50dp"
+	    android:gravity="left" >
+
+   		<TableRow
+			android:id="@+id/tableRow1"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content">
+
+			<TextView
+			    android:id="@+id/tvMatricule"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:text="@string/textview_matricule" />
+
+			<TextView
+				android:id="@+id/tvMatriculeVal"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="20dp"
+				android:text="" />
+		</TableRow>
+	    
+		<TableRow
+			android:id="@+id/tableRow2"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content">
+
+			<TextView
+			    android:id="@+id/tvFirstName"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:text="@string/textview_firstname" />
+
+			<TextView
+				android:id="@+id/tvFirstNameVal"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="20dp"
+				android:text="" />
+		</TableRow>
+		
+		<TableRow
+			android:id="@+id/tableRow3"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content">
+
+			<TextView
+			    android:id="@+id/tvLastName"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:text="@string/textview_lastname" />
+
+			<TextView
+				android:id="@+id/tvLastNameVal"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="20dp"
+				android:text="" />
+		</TableRow>
+		
+		<TableRow
+			android:id="@+id/tableRow4"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content">
+
+			<TextView
+			    android:id="@+id/tvBalance"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:text="@string/textview_balance" />
+
+			<TextView
+				android:id="@+id/tvBalanceVal"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="20dp"
+				android:text="" />
+		</TableRow>
+    </TableLayout>
+</RelativeLayout>
